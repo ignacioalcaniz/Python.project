@@ -1,0 +1,264 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="es" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>proyectoPY.controller package &mdash; documentación de Biblioteca Popular Nelly Llorens - 1.0.0</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=36c4ab74"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/translations.js?v=f85f4cfb"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Índice" href="genindex.html" />
+    <link rel="search" title="Búsqueda" href="search.html" />
+    <link rel="next" title="proyectoPY.model package" href="proyectoPY.model.html" />
+    <link rel="prev" title="ProyectoPY" href="proyectoPY.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Biblioteca Popular Nelly Llorens
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Buscar documentos" aria-label="Buscar documentos" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contenidos:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="proyectoPY.html">ProyectoPY</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">proyectoPY.controller package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-proyectoPY.controller.controller">proyectoPY.controller.controller module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#modulo-controller">Módulo controller</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#proyectoPY.controller.controller.BibliotecaController"><code class="docutils literal notranslate"><span class="pre">BibliotecaController</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#proyectoPY.controller.controller.BibliotecaController.actualizar_libros"><code class="docutils literal notranslate"><span class="pre">BibliotecaController.actualizar_libros()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#proyectoPY.controller.controller.BibliotecaController.actualizar_socios"><code class="docutils literal notranslate"><span class="pre">BibliotecaController.actualizar_socios()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#proyectoPY.controller.controller.BibliotecaController.buscar_libros"><code class="docutils literal notranslate"><span class="pre">BibliotecaController.buscar_libros()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#proyectoPY.controller.controller.BibliotecaController.eliminar_libro"><code class="docutils literal notranslate"><span class="pre">BibliotecaController.eliminar_libro()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#proyectoPY.controller.controller.BibliotecaController.eliminar_socio"><code class="docutils literal notranslate"><span class="pre">BibliotecaController.eliminar_socio()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#proyectoPY.controller.controller.BibliotecaController.exportar_libros"><code class="docutils literal notranslate"><span class="pre">BibliotecaController.exportar_libros()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#proyectoPY.controller.controller.BibliotecaController.exportar_socios"><code class="docutils literal notranslate"><span class="pre">BibliotecaController.exportar_socios()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#proyectoPY.controller.controller.BibliotecaController.guardar_libro"><code class="docutils literal notranslate"><span class="pre">BibliotecaController.guardar_libro()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#proyectoPY.controller.controller.BibliotecaController.guardar_socio"><code class="docutils literal notranslate"><span class="pre">BibliotecaController.guardar_socio()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#proyectoPY.controller.controller.BibliotecaController.modificar_libro"><code class="docutils literal notranslate"><span class="pre">BibliotecaController.modificar_libro()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#proyectoPY.controller.controller.BibliotecaController.modificar_socio"><code class="docutils literal notranslate"><span class="pre">BibliotecaController.modificar_socio()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#proyectoPY.controller.controller.BibliotecaController.ui_consultar_libros"><code class="docutils literal notranslate"><span class="pre">BibliotecaController.ui_consultar_libros()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#proyectoPY.controller.controller.BibliotecaController.ui_consultar_socios"><code class="docutils literal notranslate"><span class="pre">BibliotecaController.ui_consultar_socios()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#proyectoPY.controller.controller.BibliotecaController.ui_devolver"><code class="docutils literal notranslate"><span class="pre">BibliotecaController.ui_devolver()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#proyectoPY.controller.controller.BibliotecaController.ui_prestar"><code class="docutils literal notranslate"><span class="pre">BibliotecaController.ui_prestar()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-proyectoPY.controller">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="proyectoPY.model.html">proyectoPY.model package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proyectoPY.view.html">proyectoPY.view package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proyectoPY.patterns.html">proyectoPY.patterns package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proyectoPY.infra.html">proyectoPY.infra package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Biblioteca Popular Nelly Llorens</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">proyectoPY.controller package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/proyectoPY.controller.rst.txt" rel="nofollow"> Ver código fuente de la página</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="proyectopy-controller-package">
+<h1>proyectoPY.controller package<a class="headerlink" href="#proyectopy-controller-package" title="Link to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+</section>
+<section id="module-proyectoPY.controller.controller">
+<span id="proyectopy-controller-controller-module"></span><h2>proyectoPY.controller.controller module<a class="headerlink" href="#module-proyectoPY.controller.controller" title="Link to this heading"></a></h2>
+<section id="modulo-controller">
+<h3>Módulo controller<a class="headerlink" href="#modulo-controller" title="Link to this heading"></a></h3>
+<p>Controlador principal de la Biblioteca Popular Nelly Llorens.
+UX profesional:
+- Prestar: ventana con buscador + lista de socios (doble-click) → sin cambiar de pestaña
+- Devolver: ventana con préstamos activos del libro seleccionado → sin ID manual</p>
+<p>Responsabilidades:
+- Coordinar la comunicación entre la vista (Tkinter) y el modelo (Peewee/MySQL).
+- Validar datos de entrada (libros y socios).
+- Ejecutar CRUD de Libros y Socios.
+- Gestionar préstamos y devoluciones.
+- Publicar eventos (Observer) y enviar logs por socket.
+- Exportar CSV.</p>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="proyectoPY.controller.controller.BibliotecaController">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">proyectoPY.controller.controller.</span></span><span class="sig-name descname"><span class="pre">BibliotecaController</span></span><a class="reference internal" href="_modules/proyectoPY/controller/controller.html#BibliotecaController"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#proyectoPY.controller.controller.BibliotecaController" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Controlador principal: maneja Libros + Socios + Préstamos con validaciones estrictas,
+ventanas modales de consulta, y operaciones transaccionales (decoradores).</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="proyectoPY.controller.controller.BibliotecaController.actualizar_libros">
+<span class="sig-name descname"><span class="pre">actualizar_libros</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/proyectoPY/controller/controller.html#BibliotecaController.actualizar_libros"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#proyectoPY.controller.controller.BibliotecaController.actualizar_libros" title="Link to this definition"></a></dt>
+<dd><p>Vuelca al TreeView la lista completa de libros.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="proyectoPY.controller.controller.BibliotecaController.actualizar_socios">
+<span class="sig-name descname"><span class="pre">actualizar_socios</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/proyectoPY/controller/controller.html#BibliotecaController.actualizar_socios"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#proyectoPY.controller.controller.BibliotecaController.actualizar_socios" title="Link to this definition"></a></dt>
+<dd><p>Vuelca al TreeView la lista completa de socios.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="proyectoPY.controller.controller.BibliotecaController.buscar_libros">
+<span class="sig-name descname"><span class="pre">buscar_libros</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/proyectoPY/controller/controller.html#BibliotecaController.buscar_libros"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#proyectoPY.controller.controller.BibliotecaController.buscar_libros" title="Link to this definition"></a></dt>
+<dd><p>Filtro client-side por título/autor/categoría.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="proyectoPY.controller.controller.BibliotecaController.eliminar_libro">
+<span class="sig-name descname"><span class="pre">eliminar_libro</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/proyectoPY/controller/controller.html#BibliotecaController.eliminar_libro"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#proyectoPY.controller.controller.BibliotecaController.eliminar_libro" title="Link to this definition"></a></dt>
+<dd><p>Elimina el libro seleccionado.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="proyectoPY.controller.controller.BibliotecaController.eliminar_socio">
+<span class="sig-name descname"><span class="pre">eliminar_socio</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/proyectoPY/controller/controller.html#BibliotecaController.eliminar_socio"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#proyectoPY.controller.controller.BibliotecaController.eliminar_socio" title="Link to this definition"></a></dt>
+<dd><p>Elimina socio seleccionado.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="proyectoPY.controller.controller.BibliotecaController.exportar_libros">
+<span class="sig-name descname"><span class="pre">exportar_libros</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/proyectoPY/controller/controller.html#BibliotecaController.exportar_libros"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#proyectoPY.controller.controller.BibliotecaController.exportar_libros" title="Link to this definition"></a></dt>
+<dd><p>Genera export_libros.csv en la carpeta del proyecto.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="proyectoPY.controller.controller.BibliotecaController.exportar_socios">
+<span class="sig-name descname"><span class="pre">exportar_socios</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/proyectoPY/controller/controller.html#BibliotecaController.exportar_socios"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#proyectoPY.controller.controller.BibliotecaController.exportar_socios" title="Link to this definition"></a></dt>
+<dd><p>Genera export_socios.csv en la carpeta del proyecto.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="proyectoPY.controller.controller.BibliotecaController.guardar_libro">
+<span class="sig-name descname"><span class="pre">guardar_libro</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/proyectoPY/controller/controller.html#BibliotecaController.guardar_libro"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#proyectoPY.controller.controller.BibliotecaController.guardar_libro" title="Link to this definition"></a></dt>
+<dd><p>Crea libro (validando todos los campos salvo “ubicación”).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="proyectoPY.controller.controller.BibliotecaController.guardar_socio">
+<span class="sig-name descname"><span class="pre">guardar_socio</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/proyectoPY/controller/controller.html#BibliotecaController.guardar_socio"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#proyectoPY.controller.controller.BibliotecaController.guardar_socio" title="Link to this definition"></a></dt>
+<dd><p>Crea un socio con todos los campos obligatorios.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="proyectoPY.controller.controller.BibliotecaController.modificar_libro">
+<span class="sig-name descname"><span class="pre">modificar_libro</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/proyectoPY/controller/controller.html#BibliotecaController.modificar_libro"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#proyectoPY.controller.controller.BibliotecaController.modificar_libro" title="Link to this definition"></a></dt>
+<dd><p>Modifica libro seleccionado (con mismas validaciones).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="proyectoPY.controller.controller.BibliotecaController.modificar_socio">
+<span class="sig-name descname"><span class="pre">modificar_socio</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/proyectoPY/controller/controller.html#BibliotecaController.modificar_socio"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#proyectoPY.controller.controller.BibliotecaController.modificar_socio" title="Link to this definition"></a></dt>
+<dd><p>Modifica socio seleccionado con validaciones.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="proyectoPY.controller.controller.BibliotecaController.ui_consultar_libros">
+<span class="sig-name descname"><span class="pre">ui_consultar_libros</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/proyectoPY/controller/controller.html#BibliotecaController.ui_consultar_libros"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#proyectoPY.controller.controller.BibliotecaController.ui_consultar_libros" title="Link to this definition"></a></dt>
+<dd><p>Ventana de consulta de libros con buscador (título/autor/categoría).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="proyectoPY.controller.controller.BibliotecaController.ui_consultar_socios">
+<span class="sig-name descname"><span class="pre">ui_consultar_socios</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/proyectoPY/controller/controller.html#BibliotecaController.ui_consultar_socios"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#proyectoPY.controller.controller.BibliotecaController.ui_consultar_socios" title="Link to this definition"></a></dt>
+<dd><p>Ventana de consulta de socios con buscador (nombre/DNI/email).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="proyectoPY.controller.controller.BibliotecaController.ui_devolver">
+<span class="sig-name descname"><span class="pre">ui_devolver</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/proyectoPY/controller/controller.html#BibliotecaController.ui_devolver"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#proyectoPY.controller.controller.BibliotecaController.ui_devolver" title="Link to this definition"></a></dt>
+<dd><p>Abre ventana modal con los préstamos activos del libro seleccionado para
+elegir y devolver (sin ingresar ID).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="proyectoPY.controller.controller.BibliotecaController.ui_prestar">
+<span class="sig-name descname"><span class="pre">ui_prestar</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/proyectoPY/controller/controller.html#BibliotecaController.ui_prestar"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#proyectoPY.controller.controller.BibliotecaController.ui_prestar" title="Link to this definition"></a></dt>
+<dd><p>Abre una ventana modal para elegir socio (con buscador) y registrar el préstamo
+del libro actualmente seleccionado en el TreeView.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-proyectoPY.controller">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-proyectoPY.controller" title="Link to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Pie de página">
+        <a href="proyectoPY.html" class="btn btn-neutral float-left" title="ProyectoPY" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Anterior</a>
+        <a href="proyectoPY.model.html" class="btn btn-neutral float-right" title="proyectoPY.model package" accesskey="n" rel="next">Siguiente <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Derechos de autor .</p>
+  </div>
+
+  Compilado con <a href="https://www.sphinx-doc.org/">Sphinx</a> usando un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">tema</a>
+    proporcionado por <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

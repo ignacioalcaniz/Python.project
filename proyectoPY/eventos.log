@@ -1,0 +1,11 @@
+libro_creado: {'id': 1, 'titulo': 'EL PRINCIPITO'}
+libro_eliminado: {'id': 1, 'titulo': 'EL PRINCIPITO'}
+libro_creado: {'id': 1, 'titulo': 'EL PRINCIPITO'}
+libro_creado: {'id': 2, 'titulo': '1984'}
+prestamo_realizado: {'libro': '1984', 'socio': 'IGNACIO ALCANIZ'}
+libro_modificado: {'id': 1, 'titulo': 'EL PRINCIPITO'}
+libro_modificado: {'id': 1, 'titulo': 'EL PRINCIPITO'}
+libro_modificado: {'id': 1, 'titulo': 'EL PRINCIPITO'}
+libro_modificado: {'id': 1, 'titulo': 'EL PRINCIPITO'}
+libro_creado: {'id': 1, 'titulo': 'evita. jirones de su vida'}
+prestamo_realizado: {'libro': 'evita. jirones de su vida', 'socio': 'ignacio alcaniz', 'prestamo_id': 1}

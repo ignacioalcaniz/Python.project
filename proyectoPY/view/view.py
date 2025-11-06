@@ -1,57 +1,145 @@
 from tkinter import *
 from tkinter import ttk
 
-# Crear ventana principal
-vivero_stock = Tk()
-vivero_stock.title("Vivero LaPlace Stock")
-vivero_stock.geometry("500x400")
-vivero_stock.configure(bg="#f0f8f5")  # Fondo suave verde-agua
+# ---------- VENTANA PRINCIPAL ----------
+ventana_principal = Tk()
+ventana_principal.title("Biblioteca Popular Nelly Llorens - Gestión")
+ventana_principal.geometry("1020x660")
+ventana_principal.configure(bg="#f0f8f5")
 
-# Estilos globales
-style = ttk.Style()
-style.configure("Treeview",
-                background="white",
-                foreground="black",
-                rowheight=25,
-                fieldbackground="white",
-                font=("Arial", 10))
-style.map("Treeview",
-          background=[("selected", "#90EE90")])  # Verde claro selección
+# ---------- NOTEBOOK (Pestañas) ----------
+notebook = ttk.Notebook(ventana_principal)
+notebook.pack(fill="both", expand=True)
 
-style.configure("TButton",
-                font=("Arial", 10, "bold"),
-                padding=5)
+# =========================================================
+#  PESTAÑA: LIBROS
+# =========================================================
+tab_libros = Frame(notebook, bg="#f0f8f5")
+notebook.add(tab_libros, text="Libros")
 
-# Variables de entrada
-var_nombre = StringVar()
+# Vars Libros
+var_titulo = StringVar()
+var_autor = StringVar()
+var_categoria = StringVar()
+var_editorial = StringVar()
+var_anio = StringVar()
+var_pais = StringVar()
+var_ubicacion = StringVar()
 var_cantidad = IntVar()
 var_precio = StringVar()
+var_buscar_libro = StringVar()
 
-# Labels y campos de entrada
-Label(vivero_stock, text="Nombre", font=("Arial", 11, "bold"), bg="#f0f8f5").grid(row=0, column=1, sticky=W)
-Label(vivero_stock, text="Cantidad", font=("Arial", 11, "bold"), bg="#f0f8f5").grid(row=1, column=1, sticky=W)
-Label(vivero_stock, text="Precio $", font=("Arial", 11, "bold"), bg="#f0f8f5").grid(row=2, column=1, sticky=W)
+# Formulario de Libros
+r = 0
+Label(tab_libros, text="Título *", font=("Arial", 10, "bold"), bg="#f0f8f5").grid(row=r, column=0, sticky=W, padx=8, pady=4)
+Entry(tab_libros, textvariable=var_titulo, width=48).grid(row=r, column=1, padx=6, pady=4, sticky=W); r += 1
 
-Entry(vivero_stock, textvariable=var_nombre).grid(row=0, column=2, padx=5, pady=3)
-Entry(vivero_stock, textvariable=var_cantidad).grid(row=1, column=2, padx=5, pady=3)
-Entry(vivero_stock, textvariable=var_precio).grid(row=2, column=2, padx=5, pady=3)
+Label(tab_libros, text="Autor *", font=("Arial", 10, "bold"), bg="#f0f8f5").grid(row=r, column=0, sticky=W, padx=8, pady=4)
+Entry(tab_libros, textvariable=var_autor, width=48).grid(row=r, column=1, padx=6, pady=4, sticky=W); r += 1
 
-# Tabla (Treeview) para mostrar los productos
-tree_vivero = ttk.Treeview(vivero_stock, columns=("col1", "col2", "col3"), show="headings")
-tree_vivero.column("col1", width=150, anchor=W)
-tree_vivero.column("col2", width=100, anchor=CENTER)
-tree_vivero.column("col3", width=100, anchor=E)
+Label(tab_libros, text="Categoría *", font=("Arial", 10, "bold"), bg="#f0f8f5").grid(row=r, column=0, sticky=W, padx=8, pady=4)
+Entry(tab_libros, textvariable=var_categoria, width=30).grid(row=r, column=1, padx=6, pady=4, sticky=W); r += 1
 
-tree_vivero.heading("col1", text="Nombre")
-tree_vivero.heading("col2", text="Cantidad")
-tree_vivero.heading("col3", text="Precio")
+Label(tab_libros, text="Editorial *", font=("Arial", 10, "bold"), bg="#f0f8f5").grid(row=r, column=0, sticky=W, padx=8, pady=4)
+Entry(tab_libros, textvariable=var_editorial, width=30).grid(row=r, column=1, padx=6, pady=4, sticky=W); r += 1
 
-tree_vivero.grid(row=5, column=0, columnspan=4, padx=10, pady=10)
+Label(tab_libros, text="Año *", font=("Arial", 10, "bold"), bg="#f0f8f5").grid(row=r, column=0, sticky=W, padx=8, pady=4)
+Entry(tab_libros, textvariable=var_anio, width=12).grid(row=r, column=1, padx=6, pady=4, sticky=W); r += 1
 
-# Exportar elementos clave para ser usados por el controlador
+Label(tab_libros, text="País *", font=("Arial", 10, "bold"), bg="#f0f8f5").grid(row=r, column=0, sticky=W, padx=8, pady=4)
+Entry(tab_libros, textvariable=var_pais, width=20).grid(row=r, column=1, padx=6, pady=4, sticky=W); r += 1
+
+Label(tab_libros, text="Ubicación (opcional)", font=("Arial", 10, "bold"), bg="#f0f8f5").grid(row=r, column=0, sticky=W, padx=8, pady=4)
+Entry(tab_libros, textvariable=var_ubicacion, width=30).grid(row=r, column=1, padx=6, pady=4, sticky=W); r += 1
+
+Label(tab_libros, text="Cantidad *", font=("Arial", 10, "bold"), bg="#f0f8f5").grid(row=r, column=0, sticky=W, padx=8, pady=4)
+Entry(tab_libros, textvariable=var_cantidad, width=12).grid(row=r, column=1, padx=6, pady=4, sticky=W); r += 1
+
+Label(tab_libros, text="Precio *", font=("Arial", 10, "bold"), bg="#f0f8f5").grid(row=r, column=0, sticky=W, padx=8, pady=4)
+Entry(tab_libros, textvariable=var_precio, width=15).grid(row=r, column=1, padx=6, pady=4, sticky=W); r += 1
+
+# Buscador de libros
+Label(tab_libros, text="Buscar (título/autor):", bg="#f0f8f5").grid(row=r, column=0, sticky=W, padx=8)
+Entry(tab_libros, textvariable=var_buscar_libro, width=48).grid(row=r, column=1, padx=6, pady=4, sticky=W); r += 1
+
+# Tabla Libros
+tree_libros = ttk.Treeview(
+    tab_libros, columns=("titulo","autor","categoria","cant","precio"),
+    show="headings", height=12
+)
+for col, txt, w in [
+    ("titulo","Título",300),
+    ("autor","Autor",220),
+    ("categoria","Categoría",160),
+    ("cant","Cant.",70),
+    ("precio","Precio",90),
+]:
+    tree_libros.heading(col, text=txt)
+    tree_libros.column(col, width=w, anchor=W)
+tree_libros.grid(row=r, column=0, columnspan=5, padx=10, pady=10, sticky="nsew")
+
+# Contenedor de botones Libros (lo usa el Controller)
+frame_libros_buttons = Frame(tab_libros, bg="#f0f8f5")
+frame_libros_buttons.grid(row=r+1, column=0, columnspan=5, pady=8)
+
+# =========================================================
+#  PESTAÑA: SOCIOS
+# =========================================================
+tab_socios = Frame(notebook, bg="#eef6ff")
+notebook.add(tab_socios, text="Socios")
+
+var_socio_nombre = StringVar()
+var_socio_dni = StringVar()
+var_socio_tel = StringVar()
+var_socio_email = StringVar()
+
+Label(tab_socios, text="Nombre *", bg="#eef6ff", font=("Arial", 10, "bold")).grid(row=0, column=0, sticky=W, padx=8, pady=4)
+Entry(tab_socios, textvariable=var_socio_nombre, width=40).grid(row=0, column=1, padx=6, pady=4, sticky=W)
+
+Label(tab_socios, text="DNI *", bg="#eef6ff", font=("Arial", 10, "bold")).grid(row=1, column=0, sticky=W, padx=8, pady=4)
+Entry(tab_socios, textvariable=var_socio_dni, width=20).grid(row=1, column=1, padx=6, pady=4, sticky=W)
+
+Label(tab_socios, text="Teléfono *", bg="#eef6ff", font=("Arial", 10, "bold")).grid(row=2, column=0, sticky=W, padx=8, pady=4)
+Entry(tab_socios, textvariable=var_socio_tel, width=20).grid(row=2, column=1, padx=6, pady=4, sticky=W)
+
+Label(tab_socios, text="Email *", bg="#eef6ff", font=("Arial", 10, "bold")).grid(row=3, column=0, sticky=W, padx=8, pady=4)
+Entry(tab_socios, textvariable=var_socio_email, width=30).grid(row=3, column=1, padx=6, pady=4, sticky=W)
+
+tree_socios = ttk.Treeview(
+    tab_socios, columns=("nombre","dni","telefono","email"),
+    show="headings", height=14
+)
+for col, txt, w in [
+    ("nombre","Nombre",280),
+    ("dni","DNI",120),
+    ("telefono","Teléfono",160),
+    ("email","Email",240),
+]:
+    tree_socios.heading(col, text=txt)
+    tree_socios.column(col, width=w, anchor=W)
+tree_socios.grid(row=6, column=0, columnspan=5, padx=10, pady=10, sticky="nsew")
+
+# Contenedor de botones Socios (lo usa el Controller)
+frame_socios_buttons = Frame(tab_socios, bg="#eef6ff")
+frame_socios_buttons.grid(row=7, column=0, columnspan=5, pady=8)
+
+# ---------- EXPORT ----------
 __all__ = [
-    "vivero_stock", "var_nombre", "var_cantidad", "var_precio", "tree_vivero"
+    "ventana_principal", "notebook",
+    # Libros
+    "tab_libros", "var_titulo", "var_autor", "var_categoria", "var_editorial",
+    "var_anio", "var_pais", "var_ubicacion", "var_cantidad", "var_precio",
+    "tree_libros", "var_buscar_libro", "frame_libros_buttons",
+    # Socios
+    "tab_socios", "var_socio_nombre", "var_socio_dni", "var_socio_tel", "var_socio_email",
+    "tree_socios", "frame_socios_buttons",
 ]
+
+
+
+
+
+
 
 
 

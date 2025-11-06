@@ -2,93 +2,187 @@
 Módulo model
 ------------
 
-Este módulo define la clase ProductoModel y el modelo ORM Producto 
-para la aplicación "Vivero La Place Stock".
+Define los modelos ORM y la clase `BibliotecaModel` responsable de la lógica
+de base de datos para la Biblioteca Popular Nelly Llorens.
 
-Responsabilidades del modelo:
-- Manejar la conexión con la base de datos (SQLite).
-- Definir la estructura de la tabla de productos mediante Peewee ORM.
-- Proveer métodos CRUD (Crear, Leer, Actualizar, Eliminar) para los productos.
+Responsabilidades:
+- Conexión a MySQL.
+- Definición de tablas ORM (Libro, Socio, Prestamo).
+- CRUD de Libros y Socios.
+- Registro de Préstamos y Devoluciones.
+- Publicación de eventos (Observer).
 """
 
+import pymysql
+pymysql.install_as_MySQLdb()
+
 from peewee import *
+from datetime import datetime
 
-# Conexión a la base SQLite
-db = SqliteDatabase("viverolaplace.db")
-
+# ----------------- CONEXIÓN MYSQL -----------------
+db = MySQLDatabase(
+    'biblioteca_db',
+    user='root',
+    password='Secu2015$',
+    host='localhost',
+    port=3306
+)
 
 class BaseModel(Model):
-    """Clase base para todos los modelos (permite compartir la DB)."""
     class Meta:
         database = db
 
-
-class Producto(BaseModel):
-    """
-    Modelo ORM para la tabla 'productos'.
-
-    Campos:
-        id (int): Identificador único del producto.
-        nombre (str): Nombre del producto.
-        cantidad (int): Cantidad en stock.
-        precio (str): Precio del producto.
-    """
+# ----------------- TABLAS -----------------
+class Libro(BaseModel):
     id = AutoField()
-    nombre = CharField(unique=True)
+    titulo = CharField(unique=True)
+    autor = CharField()
+    categoria = CharField()
+    editorial = CharField(null=True)
+    anio = IntegerField(null=True)
+    pais = CharField(null=True)
+    ubicacion = CharField(null=True)
     cantidad = IntegerField(default=0)
-    precio = CharField()
+    precio = CharField(null=True)
+
+class Socio(BaseModel):
+    id = AutoField()
+    nombre = CharField()
+    dni = CharField(null=True)
+    telefono = CharField(null=True)
+    email = CharField(unique=True)
+
+class Prestamo(BaseModel):
+    id = AutoField()
+    libro = ForeignKeyField(Libro, backref="prestamos")
+    socio = ForeignKeyField(Socio, backref="prestamos")
+    fecha_prestamo = DateTimeField(default=datetime.now)
+    fecha_devolucion = DateTimeField(null=True)
 
 
-class ProductoModel:
+# ----------------- OBSERVER (EVENTOS) -----------------
+from proyectoPY.patterns.observer import (
+    event_bus,
+    EVT_LIBRO_CREADO, EVT_LIBRO_MODIFICADO, EVT_LIBRO_ELIMINADO,
+    EVT_SOCIO_CREADO,
+    EVT_PRESTAMO_REALIZADO, EVT_DEVOLUCION_REGISTRADA
+)
+
+# ----------------- LÓGICA -----------------
+class BibliotecaModel:
     """
-    Clase adaptadora entre el ORM (Peewee) y el controlador.
-
-    Métodos:
-        obtener_productos(): Devuelve todos los productos como lista de tuplas.
-        insertar_producto(nombre, cantidad, precio): Inserta un nuevo producto.
-        eliminar_producto(id_producto): Elimina un producto por su ID.
-        modificar_producto(id_producto, nombre, cantidad, precio): Modifica un producto existente.
+    Maneja toda la lógica de datos de Biblioteca.
     """
-
     def __init__(self):
-        """Inicializa la base de datos y crea la tabla si no existe."""
-        db.connect()
-        db.create_tables([Producto])
+        db.connect(reuse_if_open=True)
+        db.create_tables([Libro, Socio, Prestamo])
 
-    def obtener_productos(self):
-        """Obtiene todos los productos de la base de datos."""
-        try:
-            return [(p.id, p.nombre, p.cantidad, p.precio) for p in Producto.select()]
-        except Exception as e:
-            print(f"[ERROR] al obtener productos: {e}")
-            return []
+    # ================= LIBROS =================
+    def libros_todos(self):
+        libros = []
+        for l in Libro.select():
+            libros.append({
+                "id": l.id,
+                "titulo": l.titulo,
+                "autor": l.autor,
+                "categoria": l.categoria,
+                "editorial": l.editorial,
+                "anio": l.anio,
+                "pais": l.pais,
+                "ubicacion": l.ubicacion,
+                "cantidad": l.cantidad,
+                "precio": l.precio
+            })
+        return libros
 
-    def insertar_producto(self, nombre, cantidad, precio):
-        """Inserta un nuevo producto en la base de datos."""
-        try:
-            Producto.create(nombre=nombre, cantidad=cantidad, precio=precio)
-        except Exception as e:
-            print(f"[ERROR] al insertar producto: {e}")
+    def libro_crear(self, **datos):
+        l = Libro.create(**datos)
+        event_bus.publish(EVT_LIBRO_CREADO, {"id": l.id, "titulo": l.titulo})
+        return l
 
-    def eliminar_producto(self, id_producto):
-        """Elimina un producto por su ID."""
-        try:
-            prod = Producto.get_or_none(Producto.id == id_producto)
-            if prod:
-                prod.delete_instance()
-        except Exception as e:
-            print(f"[ERROR] al eliminar producto: {e}")
+    def libro_modificar(self, id_libro, **datos):
+        l = Libro.get_or_none(Libro.id == id_libro)
+        if l:
+            for campo, valor in datos.items():
+                setattr(l, campo, valor)
+            l.save()
+            event_bus.publish(EVT_LIBRO_MODIFICADO, {"id": l.id, "titulo": l.titulo})
 
-    def modificar_producto(self, id_producto, nombre, cantidad, precio):
-        """Modifica un producto existente en la base de datos."""
-        try:
-            prod = Producto.get_or_none(Producto.id == id_producto)
-            if prod:
-                prod.nombre = nombre
-                prod.cantidad = cantidad
-                prod.precio = precio
-                prod.save()
-        except Exception as e:
-            print(f"[ERROR] al modificar producto: {e}")
+    def libro_eliminar(self, id_libro):
+        l = Libro.get_or_none(Libro.id == id_libro)
+        if l:
+            titulo = l.titulo
+            l.delete_instance()
+            event_bus.publish(EVT_LIBRO_ELIMINADO, {"id": id_libro, "titulo": titulo})
+
+    # ================= SOCIOS =================
+    def socios_todos(self):
+        socios = []
+        for s in Socio.select():
+            socios.append({
+                "id": s.id,
+                "nombre": s.nombre,
+                "dni": s.dni,
+                "telefono": s.telefono,
+                "email": s.email
+            })
+        return socios
+
+    def socio_crear(self, **datos):
+        s = Socio.create(**datos)
+        event_bus.publish(EVT_SOCIO_CREADO, {"id": s.id, "nombre": s.nombre})
+        return s
+
+    def socio_modificar(self, id_socio, **datos):
+        s = Socio.get_or_none(Socio.id == id_socio)
+        if s:
+            for campo, valor in datos.items():
+                setattr(s, campo, valor)
+            s.save()
+
+    def socio_eliminar(self, id_socio):
+        s = Socio.get_or_none(Socio.id == id_socio)
+        if s:
+            s.delete_instance()
+
+    # ================= PRÉSTAMOS =================
+    def prestar(self, id_libro, id_socio):
+        l = Libro.get_or_none(Libro.id == id_libro)
+        s = Socio.get_or_none(Socio.id == id_socio)
+
+        if not l or not s:
+            raise ValueError("Libro o socio inexistente.")
+        if l.cantidad <= 0:
+            raise ValueError("No hay ejemplares disponibles.")
+
+        l.cantidad -= 1
+        l.save()
+
+        p = Prestamo.create(libro=l, socio=s)
+        event_bus.publish(EVT_PRESTAMO_REALIZADO, {"libro": l.titulo, "socio": s.nombre, "prestamo_id": p.id})
+        return p.id
+
+    def devolver(self, id_prestamo):
+        p = Prestamo.get_or_none(Prestamo.id == id_prestamo)
+        if not p:
+            raise ValueError("Préstamo inexistente.")
+        if p.fecha_devolucion:
+            raise ValueError("Este préstamo ya fue devuelto.")
+
+        p.fecha_devolucion = datetime.now()
+        p.save()
+
+        l = p.libro
+        l.cantidad += 1
+        l.save()
+
+        event_bus.publish(EVT_DEVOLUCION_REGISTRADA, {"libro": l.titulo, "prestamo_id": p.id})
+
+
+
+
+
+
+
 
 

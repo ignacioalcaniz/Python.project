@@ -1,0 +1,149 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="es" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>proyectoPY.infra package &mdash; documentación de Biblioteca Popular Nelly Llorens - 1.0.0</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=36c4ab74"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/translations.js?v=f85f4cfb"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Índice" href="genindex.html" />
+    <link rel="search" title="Búsqueda" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Biblioteca Popular Nelly Llorens
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Buscar documentos" aria-label="Buscar documentos" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Módulos del sistema:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="main.html">proyectoPY.main module</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Biblioteca Popular Nelly Llorens</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">proyectoPY.infra package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/proyectoPY.infra.rst.txt" rel="nofollow"> Ver código fuente de la página</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="proyectopy-infra-package">
+<h1>proyectoPY.infra package<a class="headerlink" href="#proyectopy-infra-package" title="Link to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+</section>
+<section id="module-proyectoPY.infra.log_client">
+<span id="proyectopy-infra-log-client-module"></span><h2>proyectoPY.infra.log_client module<a class="headerlink" href="#module-proyectoPY.infra.log_client" title="Link to this heading"></a></h2>
+<section id="cliente-de-log">
+<h3>Cliente de Log<a class="headerlink" href="#cliente-de-log" title="Link to this heading"></a></h3>
+<p>Envía mensajes al servidor de log mediante sockets.</p>
+<p>Se usa desde el patrón observador, en el controlador, para registrar eventos.</p>
+</section>
+<dl class="py function">
+<dt class="sig sig-object py" id="proyectoPY.infra.log_client.send_log">
+<span class="sig-prename descclassname"><span class="pre">proyectoPY.infra.log_client.</span></span><span class="sig-name descname"><span class="pre">send_log</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/proyectoPY/infra/log_client.html#send_log"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#proyectoPY.infra.log_client.send_log" title="Link to this definition"></a></dt>
+<dd><p>Envía un mensaje al servidor de logs.</p>
+</dd></dl>
+
+</section>
+<section id="module-proyectoPY.infra.log_server">
+<span id="proyectopy-infra-log-server-module"></span><h2>proyectoPY.infra.log_server module<a class="headerlink" href="#module-proyectoPY.infra.log_server" title="Link to this heading"></a></h2>
+<section id="servidor-de-log">
+<h3>Servidor de Log<a class="headerlink" href="#servidor-de-log" title="Link to this heading"></a></h3>
+<p>Este servidor recibe mensajes desde los clientes mediante sockets y los guarda
+en un archivo de texto. Cumple con el requisito del punto 5 del módulo avanzado.</p>
+<dl class="simple">
+<dt>Para ejecutarlo:</dt><dd><p>python -m proyectoPY.infra.log_server</p>
+</dd>
+</dl>
+</section>
+<dl class="py function">
+<dt class="sig sig-object py" id="proyectoPY.infra.log_server.iniciar_servidor">
+<span class="sig-prename descclassname"><span class="pre">proyectoPY.infra.log_server.</span></span><span class="sig-name descname"><span class="pre">iniciar_servidor</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/proyectoPY/infra/log_server.html#iniciar_servidor"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#proyectoPY.infra.log_server.iniciar_servidor" title="Link to this definition"></a></dt>
+<dd><p>Inicia el servidor de logs.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="proyectoPY.infra.log_server.manejar_cliente">
+<span class="sig-prename descclassname"><span class="pre">proyectoPY.infra.log_server.</span></span><span class="sig-name descname"><span class="pre">manejar_cliente</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">addr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/proyectoPY/infra/log_server.html#manejar_cliente"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#proyectoPY.infra.log_server.manejar_cliente" title="Link to this definition"></a></dt>
+<dd><p>Recibe mensajes del cliente y los guarda en archivo.</p>
+</dd></dl>
+
+</section>
+<section id="module-proyectoPY.infra">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-proyectoPY.infra" title="Link to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Derechos de autor .</p>
+  </div>
+
+  Compilado con <a href="https://www.sphinx-doc.org/">Sphinx</a> usando un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">tema</a>
+    proporcionado por <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

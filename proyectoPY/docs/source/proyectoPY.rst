@@ -6,17 +6,27 @@ ProyectoPY
     :undoc-members:
     :show-inheritance:
 
-.. automodule:: proyectoPY.main
+.. automodule:: proyectoPY.controller
     :members:
     :undoc-members:
     :show-inheritance:
 
-.. automodule:: proyectoPY.controller.controller
+.. automodule:: proyectoPY.model
     :members:
     :undoc-members:
     :show-inheritance:
 
-.. automodule:: proyectoPY.view.view
+.. automodule:: proyectoPY.view
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+.. automodule:: proyectoPY.patterns.decorators
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+.. automodule:: proyectoPY.patterns.observer
     :members:
     :undoc-members:
     :show-inheritance:

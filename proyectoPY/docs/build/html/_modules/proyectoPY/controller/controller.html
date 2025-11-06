@@ -1,0 +1,713 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="es" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>proyectoPY.controller.controller &mdash; documentación de Biblioteca Popular Nelly Llorens - 1.0.0</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=36c4ab74"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../_static/translations.js?v=f85f4cfb"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Índice" href="../../../genindex.html" />
+    <link rel="search" title="Búsqueda" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Biblioteca Popular Nelly Llorens
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Buscar documentos" aria-label="Buscar documentos" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Módulos del sistema:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../main.html">proyectoPY.main module</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Biblioteca Popular Nelly Llorens</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Código de módulo</a></li>
+      <li class="breadcrumb-item active">proyectoPY.controller.controller</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Código fuente para proyectoPY.controller.controller</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Módulo controller</span>
+<span class="sd">-----------------</span>
+<span class="sd">Controlador principal de la Biblioteca Popular Nelly Llorens.</span>
+<span class="sd">UX profesional:</span>
+<span class="sd">- Prestar: ventana con buscador + lista de socios (doble-click) → sin cambiar de pestaña</span>
+<span class="sd">- Devolver: ventana con préstamos activos del libro seleccionado → sin ID manual</span>
+
+<span class="sd">Responsabilidades:</span>
+<span class="sd">- Coordinar la comunicación entre la vista (Tkinter) y el modelo (Peewee/MySQL).</span>
+<span class="sd">- Validar datos de entrada (libros y socios).</span>
+<span class="sd">- Ejecutar CRUD de Libros y Socios.</span>
+<span class="sd">- Gestionar préstamos y devoluciones.</span>
+<span class="sd">- Publicar eventos (Observer) y enviar logs por socket.</span>
+<span class="sd">- Exportar CSV.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">tkinter</span><span class="w"> </span><span class="kn">import</span> <span class="n">Toplevel</span><span class="p">,</span> <span class="n">StringVar</span><span class="p">,</span> <span class="n">Entry</span><span class="p">,</span> <span class="n">Label</span><span class="p">,</span> <span class="n">Button</span><span class="p">,</span> <span class="n">Menu</span><span class="p">,</span> <span class="n">messagebox</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tkinter</span><span class="w"> </span><span class="kn">import</span> <span class="n">ttk</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tkinter.simpledialog</span><span class="w"> </span><span class="kn">import</span> <span class="n">askstring</span>
+
+<span class="c1"># ----- VISTA (no se toca: sólo la usamos) -----</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">proyectoPY.view.view</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">ventana_principal</span><span class="p">,</span>
+    <span class="c1"># Libros</span>
+    <span class="n">tab_libros</span><span class="p">,</span> <span class="n">var_titulo</span><span class="p">,</span> <span class="n">var_autor</span><span class="p">,</span> <span class="n">var_categoria</span><span class="p">,</span> <span class="n">var_editorial</span><span class="p">,</span>
+    <span class="n">var_anio</span><span class="p">,</span> <span class="n">var_pais</span><span class="p">,</span> <span class="n">var_ubicacion</span><span class="p">,</span> <span class="n">var_cantidad</span><span class="p">,</span> <span class="n">var_precio</span><span class="p">,</span>
+    <span class="n">var_buscar_libro</span><span class="p">,</span> <span class="n">tree_libros</span><span class="p">,</span> <span class="n">frame_libros_buttons</span><span class="p">,</span>
+    <span class="c1"># Socios</span>
+    <span class="n">tab_socios</span><span class="p">,</span> <span class="n">var_socio_nombre</span><span class="p">,</span> <span class="n">var_socio_dni</span><span class="p">,</span> <span class="n">var_socio_tel</span><span class="p">,</span> <span class="n">var_socio_email</span><span class="p">,</span>
+    <span class="n">tree_socios</span><span class="p">,</span> <span class="n">frame_socios_buttons</span>
+<span class="p">)</span>
+
+<span class="c1"># ----- MODELO -----</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">proyectoPY.model.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">BibliotecaModel</span><span class="p">,</span> <span class="n">db</span>
+
+<span class="c1"># ----- DECORADORES -----</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">proyectoPY.patterns.decorators</span><span class="w"> </span><span class="kn">import</span> <span class="n">with_transaction</span>
+
+<span class="c1"># ----- OBSERVER + LOG CLIENTE -----</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">proyectoPY.patterns.observer</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">event_bus</span><span class="p">,</span>
+    <span class="n">EVT_LIBRO_CREADO</span><span class="p">,</span> <span class="n">EVT_LIBRO_MODIFICADO</span><span class="p">,</span> <span class="n">EVT_LIBRO_ELIMINADO</span><span class="p">,</span>
+    <span class="n">EVT_SOCIO_CREADO</span><span class="p">,</span> <span class="n">EVT_PRESTAMO_REALIZADO</span><span class="p">,</span> <span class="n">EVT_DEVOLUCION_REGISTRADA</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">proyectoPY.infra.log_client</span><span class="w"> </span><span class="kn">import</span> <span class="n">send_log</span>
+
+
+<div class="viewcode-block" id="BibliotecaController">
+<a class="viewcode-back" href="../../../proyectoPY.controller.html#proyectoPY.controller.controller.BibliotecaController">[documentos]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">BibliotecaController</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Controlador principal: maneja Libros + Socios + Préstamos con validaciones estrictas,</span>
+<span class="sd">    ventanas modales de consulta, y operaciones transaccionales (decoradores).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># ======================================================================</span>
+    <span class="c1"># INIT</span>
+    <span class="c1"># ======================================================================</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">BibliotecaModel</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_configurar_menu</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_configurar_botones</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_suscribir_eventos</span><span class="p">()</span>
+
+        <span class="c1"># Carga inicial de datos en grillas</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actualizar_libros</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actualizar_socios</span><span class="p">()</span>
+
+        <span class="c1"># Búsqueda rápida en la pestaña Libros</span>
+        <span class="n">var_buscar_libro</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="k">lambda</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">buscar_libros</span><span class="p">())</span>
+
+    <span class="c1"># ======================================================================</span>
+    <span class="c1"># MENÚ SUPERIOR</span>
+    <span class="c1"># ======================================================================</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_configurar_menu</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Crea el menú superior con opciones de exportar y salir.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">menu_bar</span> <span class="o">=</span> <span class="n">Menu</span><span class="p">(</span><span class="n">ventana_principal</span><span class="p">)</span>
+        <span class="n">archivo_menu</span> <span class="o">=</span> <span class="n">Menu</span><span class="p">(</span><span class="n">menu_bar</span><span class="p">,</span> <span class="n">tearoff</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">archivo_menu</span><span class="o">.</span><span class="n">add_command</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;Exportar Libros&quot;</span><span class="p">,</span> <span class="n">command</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">exportar_libros</span><span class="p">)</span>
+        <span class="n">archivo_menu</span><span class="o">.</span><span class="n">add_command</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;Exportar Socios&quot;</span><span class="p">,</span> <span class="n">command</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">exportar_socios</span><span class="p">)</span>
+        <span class="n">archivo_menu</span><span class="o">.</span><span class="n">add_separator</span><span class="p">()</span>
+        <span class="n">archivo_menu</span><span class="o">.</span><span class="n">add_command</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;Salir&quot;</span><span class="p">,</span> <span class="n">command</span><span class="o">=</span><span class="n">ventana_principal</span><span class="o">.</span><span class="n">quit</span><span class="p">)</span>
+        <span class="n">menu_bar</span><span class="o">.</span><span class="n">add_cascade</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;Archivo&quot;</span><span class="p">,</span> <span class="n">menu</span><span class="o">=</span><span class="n">archivo_menu</span><span class="p">)</span>
+        <span class="n">ventana_principal</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">menu</span><span class="o">=</span><span class="n">menu_bar</span><span class="p">)</span>
+
+    <span class="c1"># ======================================================================</span>
+    <span class="c1"># BOTONES (encastrados en los frames de la vista)</span>
+    <span class="c1"># ======================================================================</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_configurar_botones</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Conecta los botones de la vista con callbacks del controlador.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Libros</span>
+        <span class="n">Button</span><span class="p">(</span><span class="n">frame_libros_buttons</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Guardar&quot;</span><span class="p">,</span> <span class="n">command</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">guardar_libro</span><span class="p">,</span> <span class="n">bg</span><span class="o">=</span><span class="s2">&quot;#2e7d32&quot;</span><span class="p">,</span> <span class="n">fg</span><span class="o">=</span><span class="s2">&quot;white&quot;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+        <span class="n">Button</span><span class="p">(</span><span class="n">frame_libros_buttons</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Modificar&quot;</span><span class="p">,</span> <span class="n">command</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">modificar_libro</span><span class="p">,</span> <span class="n">bg</span><span class="o">=</span><span class="s2">&quot;#f9a825&quot;</span><span class="p">,</span> <span class="n">fg</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+        <span class="n">Button</span><span class="p">(</span><span class="n">frame_libros_buttons</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Eliminar&quot;</span><span class="p">,</span> <span class="n">command</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">eliminar_libro</span><span class="p">,</span> <span class="n">bg</span><span class="o">=</span><span class="s2">&quot;#c62828&quot;</span><span class="p">,</span> <span class="n">fg</span><span class="o">=</span><span class="s2">&quot;white&quot;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+        <span class="n">Button</span><span class="p">(</span><span class="n">frame_libros_buttons</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Prestar&quot;</span><span class="p">,</span> <span class="n">command</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ui_prestar</span><span class="p">,</span> <span class="n">bg</span><span class="o">=</span><span class="s2">&quot;#8A2BE2&quot;</span><span class="p">,</span> <span class="n">fg</span><span class="o">=</span><span class="s2">&quot;white&quot;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+        <span class="n">Button</span><span class="p">(</span><span class="n">frame_libros_buttons</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Devolver&quot;</span><span class="p">,</span> <span class="n">command</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ui_devolver</span><span class="p">,</span> <span class="n">bg</span><span class="o">=</span><span class="s2">&quot;#2F4F4F&quot;</span><span class="p">,</span> <span class="n">fg</span><span class="o">=</span><span class="s2">&quot;white&quot;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+        <span class="n">Button</span><span class="p">(</span><span class="n">frame_libros_buttons</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Consultar&quot;</span><span class="p">,</span> <span class="n">command</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ui_consultar_libros</span><span class="p">,</span> <span class="n">bg</span><span class="o">=</span><span class="s2">&quot;#1976D2&quot;</span><span class="p">,</span> <span class="n">fg</span><span class="o">=</span><span class="s2">&quot;white&quot;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+
+        <span class="c1"># Socios</span>
+        <span class="n">Button</span><span class="p">(</span><span class="n">frame_socios_buttons</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Guardar Socio&quot;</span><span class="p">,</span> <span class="n">command</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">guardar_socio</span><span class="p">,</span> <span class="n">bg</span><span class="o">=</span><span class="s2">&quot;#2e7d32&quot;</span><span class="p">,</span> <span class="n">fg</span><span class="o">=</span><span class="s2">&quot;white&quot;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+        <span class="n">Button</span><span class="p">(</span><span class="n">frame_socios_buttons</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Modificar Socio&quot;</span><span class="p">,</span> <span class="n">command</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">modificar_socio</span><span class="p">,</span> <span class="n">bg</span><span class="o">=</span><span class="s2">&quot;#f9a825&quot;</span><span class="p">,</span> <span class="n">fg</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+        <span class="n">Button</span><span class="p">(</span><span class="n">frame_socios_buttons</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Eliminar Socio&quot;</span><span class="p">,</span> <span class="n">command</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">eliminar_socio</span><span class="p">,</span> <span class="n">bg</span><span class="o">=</span><span class="s2">&quot;#c62828&quot;</span><span class="p">,</span> <span class="n">fg</span><span class="o">=</span><span class="s2">&quot;white&quot;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+        <span class="n">Button</span><span class="p">(</span><span class="n">frame_socios_buttons</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Consultar Socio&quot;</span><span class="p">,</span> <span class="n">command</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ui_consultar_socios</span><span class="p">,</span> <span class="n">bg</span><span class="o">=</span><span class="s2">&quot;#1976D2&quot;</span><span class="p">,</span> <span class="n">fg</span><span class="o">=</span><span class="s2">&quot;white&quot;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+
+    <span class="c1"># ======================================================================</span>
+    <span class="c1"># OBSERVER (suscripción a eventos del dominio)</span>
+    <span class="c1"># ======================================================================</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_suscribir_eventos</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Se suscribe a los eventos del EventBus para refrescar UI y</span>
+<span class="sd">        enviar logs al servidor de eventos.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">on_evt</span><span class="p">(</span><span class="n">payload</span><span class="p">,</span> <span class="n">tag</span><span class="p">):</span>
+            <span class="n">send_log</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">payload</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">actualizar_libros</span><span class="p">()</span>  <span class="c1"># refrescamos libros en cambios y préstamos</span>
+
+        <span class="n">event_bus</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span><span class="n">EVT_LIBRO_CREADO</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">on_evt</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">EVT_LIBRO_CREADO</span><span class="p">))</span>
+        <span class="n">event_bus</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span><span class="n">EVT_LIBRO_MODIFICADO</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">on_evt</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">EVT_LIBRO_MODIFICADO</span><span class="p">))</span>
+        <span class="n">event_bus</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span><span class="n">EVT_LIBRO_ELIMINADO</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">on_evt</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">EVT_LIBRO_ELIMINADO</span><span class="p">))</span>
+        <span class="n">event_bus</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span><span class="n">EVT_PRESTAMO_REALIZADO</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">on_evt</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">EVT_PRESTAMO_REALIZADO</span><span class="p">))</span>
+        <span class="n">event_bus</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span><span class="n">EVT_DEVOLUCION_REGISTRADA</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">on_evt</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">EVT_DEVOLUCION_REGISTRADA</span><span class="p">))</span>
+        <span class="n">event_bus</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span><span class="n">EVT_SOCIO_CREADO</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">send_log</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">EVT_SOCIO_CREADO</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">p</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">))</span>
+
+    <span class="c1"># ======================================================================</span>
+    <span class="c1"># LIBROS – UTILIDADES</span>
+    <span class="c1"># ======================================================================</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_libro_seleccionado_id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Obtiene el ID (texto) del item seleccionado en el tree_libros.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">sel</span> <span class="o">=</span> <span class="n">tree_libros</span><span class="o">.</span><span class="n">focus</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">sel</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">tree_libros</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">sel</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">)</span>
+
+    <span class="c1"># ======================================================================</span>
+    <span class="c1"># LIBROS – CRUD + BÚSQUEDA</span>
+    <span class="c1"># ======================================================================</span>
+<div class="viewcode-block" id="BibliotecaController.actualizar_libros">
+<a class="viewcode-back" href="../../../proyectoPY.controller.html#proyectoPY.controller.controller.BibliotecaController.actualizar_libros">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">actualizar_libros</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Vuelca al TreeView la lista completa de libros.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">tree_libros</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="o">*</span><span class="n">tree_libros</span><span class="o">.</span><span class="n">get_children</span><span class="p">())</span>
+        <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">libros_todos</span><span class="p">():</span>
+            <span class="n">tree_libros</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;end&quot;</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">l</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">],</span>
+                               <span class="n">values</span><span class="o">=</span><span class="p">(</span><span class="n">l</span><span class="p">[</span><span class="s2">&quot;titulo&quot;</span><span class="p">],</span> <span class="n">l</span><span class="p">[</span><span class="s2">&quot;autor&quot;</span><span class="p">],</span> <span class="n">l</span><span class="p">[</span><span class="s2">&quot;categoria&quot;</span><span class="p">],</span> <span class="n">l</span><span class="p">[</span><span class="s2">&quot;cantidad&quot;</span><span class="p">],</span> <span class="n">l</span><span class="p">[</span><span class="s2">&quot;precio&quot;</span><span class="p">]))</span></div>
+
+
+<div class="viewcode-block" id="BibliotecaController.buscar_libros">
+<a class="viewcode-back" href="../../../proyectoPY.controller.html#proyectoPY.controller.controller.BibliotecaController.buscar_libros">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">buscar_libros</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Filtro client-side por título/autor/categoría.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">filtro</span> <span class="o">=</span> <span class="n">var_buscar_libro</span><span class="o">.</span><span class="n">get</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="n">tree_libros</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="o">*</span><span class="n">tree_libros</span><span class="o">.</span><span class="n">get_children</span><span class="p">())</span>
+        <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">libros_todos</span><span class="p">():</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">filtro</span> <span class="ow">in</span> <span class="n">l</span><span class="p">[</span><span class="s2">&quot;titulo&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+                <span class="ow">or</span> <span class="n">filtro</span> <span class="ow">in</span> <span class="n">l</span><span class="p">[</span><span class="s2">&quot;autor&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+                <span class="ow">or</span> <span class="n">filtro</span> <span class="ow">in</span> <span class="n">l</span><span class="p">[</span><span class="s2">&quot;categoria&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()):</span>
+                <span class="n">tree_libros</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;end&quot;</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">l</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">],</span>
+                                   <span class="n">values</span><span class="o">=</span><span class="p">(</span><span class="n">l</span><span class="p">[</span><span class="s2">&quot;titulo&quot;</span><span class="p">],</span> <span class="n">l</span><span class="p">[</span><span class="s2">&quot;autor&quot;</span><span class="p">],</span> <span class="n">l</span><span class="p">[</span><span class="s2">&quot;categoria&quot;</span><span class="p">],</span> <span class="n">l</span><span class="p">[</span><span class="s2">&quot;cantidad&quot;</span><span class="p">],</span> <span class="n">l</span><span class="p">[</span><span class="s2">&quot;precio&quot;</span><span class="p">]))</span></div>
+
+
+    <span class="c1"># -------- VALIDACIONES (LIBROS) --------</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_validar_libro_obligatorio</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">valor</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">nombre</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">valor</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">valor</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;El campo &#39;</span><span class="si">{</span><span class="n">nombre</span><span class="si">}</span><span class="s2">&#39; es obligatorio.&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_validar_libro_campos</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reglas:</span>
+<span class="sd">        - TODOS obligatorios EXCEPTO &#39;ubicación&#39;.</span>
+<span class="sd">        - año: numérico.</span>
+<span class="sd">        - cantidad: numérico &gt; 0.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_validar_libro_obligatorio</span><span class="p">(</span><span class="n">var_titulo</span><span class="o">.</span><span class="n">get</span><span class="p">(),</span> <span class="s2">&quot;Título&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_validar_libro_obligatorio</span><span class="p">(</span><span class="n">var_autor</span><span class="o">.</span><span class="n">get</span><span class="p">(),</span> <span class="s2">&quot;Autor&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_validar_libro_obligatorio</span><span class="p">(</span><span class="n">var_categoria</span><span class="o">.</span><span class="n">get</span><span class="p">(),</span> <span class="s2">&quot;Categoría&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_validar_libro_obligatorio</span><span class="p">(</span><span class="n">var_editorial</span><span class="o">.</span><span class="n">get</span><span class="p">(),</span> <span class="s2">&quot;Editorial&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_validar_libro_obligatorio</span><span class="p">(</span><span class="n">var_anio</span><span class="o">.</span><span class="n">get</span><span class="p">(),</span> <span class="s2">&quot;Año&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_validar_libro_obligatorio</span><span class="p">(</span><span class="n">var_pais</span><span class="o">.</span><span class="n">get</span><span class="p">(),</span> <span class="s2">&quot;País&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_validar_libro_obligatorio</span><span class="p">(</span><span class="n">var_precio</span><span class="o">.</span><span class="n">get</span><span class="p">(),</span> <span class="s2">&quot;Precio&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">var_anio</span><span class="o">.</span><span class="n">get</span><span class="p">()</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;El campo &#39;Año&#39; debe ser numérico.&quot;</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">cant</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">var_cantidad</span><span class="o">.</span><span class="n">get</span><span class="p">())</span>
+            <span class="k">if</span> <span class="n">cant</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;La &#39;Cantidad&#39; debe ser un número mayor que 0.&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;La &#39;Cantidad&#39; debe ser numérica.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Ubicación: opcional (puede quedar vacío)</span>
+
+<div class="viewcode-block" id="BibliotecaController.guardar_libro">
+<a class="viewcode-back" href="../../../proyectoPY.controller.html#proyectoPY.controller.controller.BibliotecaController.guardar_libro">[documentos]</a>
+    <span class="nd">@with_transaction</span><span class="p">(</span><span class="n">db</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">guardar_libro</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Crea libro (validando todos los campos salvo &#39;ubicación&#39;).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_validar_libro_campos</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">libro_crear</span><span class="p">(</span>
+                <span class="n">titulo</span><span class="o">=</span><span class="n">var_titulo</span><span class="o">.</span><span class="n">get</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
+                <span class="n">autor</span><span class="o">=</span><span class="n">var_autor</span><span class="o">.</span><span class="n">get</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
+                <span class="n">categoria</span><span class="o">=</span><span class="n">var_categoria</span><span class="o">.</span><span class="n">get</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
+                <span class="n">editorial</span><span class="o">=</span><span class="n">var_editorial</span><span class="o">.</span><span class="n">get</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
+                <span class="n">anio</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">var_anio</span><span class="o">.</span><span class="n">get</span><span class="p">()),</span>
+                <span class="n">pais</span><span class="o">=</span><span class="n">var_pais</span><span class="o">.</span><span class="n">get</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
+                <span class="n">ubicacion</span><span class="o">=</span><span class="p">(</span><span class="n">var_ubicacion</span><span class="o">.</span><span class="n">get</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">),</span>
+                <span class="n">cantidad</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">var_cantidad</span><span class="o">.</span><span class="n">get</span><span class="p">()),</span>
+                <span class="n">precio</span><span class="o">=</span><span class="n">var_precio</span><span class="o">.</span><span class="n">get</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">actualizar_libros</span><span class="p">()</span>
+            <span class="n">messagebox</span><span class="o">.</span><span class="n">showinfo</span><span class="p">(</span><span class="s2">&quot;OK&quot;</span><span class="p">,</span> <span class="s2">&quot;Libro agregado.&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">messagebox</span><span class="o">.</span><span class="n">showerror</span><span class="p">(</span><span class="s2">&quot;Error&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="BibliotecaController.modificar_libro">
+<a class="viewcode-back" href="../../../proyectoPY.controller.html#proyectoPY.controller.controller.BibliotecaController.modificar_libro">[documentos]</a>
+    <span class="nd">@with_transaction</span><span class="p">(</span><span class="n">db</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">modificar_libro</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Modifica libro seleccionado (con mismas validaciones).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">id_libro</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_libro_seleccionado_id</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">id_libro</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">messagebox</span><span class="o">.</span><span class="n">showwarning</span><span class="p">(</span><span class="s2">&quot;Seleccionar&quot;</span><span class="p">,</span> <span class="s2">&quot;Seleccione un libro.&quot;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_validar_libro_campos</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">libro_modificar</span><span class="p">(</span>
+                <span class="n">id_libro</span><span class="p">,</span>
+                <span class="n">titulo</span><span class="o">=</span><span class="n">var_titulo</span><span class="o">.</span><span class="n">get</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
+                <span class="n">autor</span><span class="o">=</span><span class="n">var_autor</span><span class="o">.</span><span class="n">get</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
+                <span class="n">categoria</span><span class="o">=</span><span class="n">var_categoria</span><span class="o">.</span><span class="n">get</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
+                <span class="n">editorial</span><span class="o">=</span><span class="n">var_editorial</span><span class="o">.</span><span class="n">get</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
+                <span class="n">anio</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">var_anio</span><span class="o">.</span><span class="n">get</span><span class="p">()),</span>
+                <span class="n">pais</span><span class="o">=</span><span class="n">var_pais</span><span class="o">.</span><span class="n">get</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
+                <span class="n">ubicacion</span><span class="o">=</span><span class="p">(</span><span class="n">var_ubicacion</span><span class="o">.</span><span class="n">get</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">),</span>
+                <span class="n">cantidad</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">var_cantidad</span><span class="o">.</span><span class="n">get</span><span class="p">()),</span>
+                <span class="n">precio</span><span class="o">=</span><span class="n">var_precio</span><span class="o">.</span><span class="n">get</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">actualizar_libros</span><span class="p">()</span>
+            <span class="n">messagebox</span><span class="o">.</span><span class="n">showinfo</span><span class="p">(</span><span class="s2">&quot;OK&quot;</span><span class="p">,</span> <span class="s2">&quot;Libro modificado.&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">messagebox</span><span class="o">.</span><span class="n">showerror</span><span class="p">(</span><span class="s2">&quot;Error&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="BibliotecaController.eliminar_libro">
+<a class="viewcode-back" href="../../../proyectoPY.controller.html#proyectoPY.controller.controller.BibliotecaController.eliminar_libro">[documentos]</a>
+    <span class="nd">@with_transaction</span><span class="p">(</span><span class="n">db</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">eliminar_libro</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Elimina el libro seleccionado.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">id_libro</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_libro_seleccionado_id</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">id_libro</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">messagebox</span><span class="o">.</span><span class="n">showwarning</span><span class="p">(</span><span class="s2">&quot;Seleccionar&quot;</span><span class="p">,</span> <span class="s2">&quot;Seleccione un libro.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">libro_eliminar</span><span class="p">(</span><span class="n">id_libro</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actualizar_libros</span><span class="p">()</span>
+        <span class="n">messagebox</span><span class="o">.</span><span class="n">showinfo</span><span class="p">(</span><span class="s2">&quot;OK&quot;</span><span class="p">,</span> <span class="s2">&quot;Libro eliminado.&quot;</span><span class="p">)</span></div>
+
+
+    <span class="c1"># ======================================================================</span>
+    <span class="c1"># SOCIOS – CRUD</span>
+    <span class="c1"># ======================================================================</span>
+<div class="viewcode-block" id="BibliotecaController.actualizar_socios">
+<a class="viewcode-back" href="../../../proyectoPY.controller.html#proyectoPY.controller.controller.BibliotecaController.actualizar_socios">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">actualizar_socios</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Vuelca al TreeView la lista completa de socios.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">tree_socios</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="o">*</span><span class="n">tree_socios</span><span class="o">.</span><span class="n">get_children</span><span class="p">())</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">socios_todos</span><span class="p">():</span>
+            <span class="n">tree_socios</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;end&quot;</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">],</span>
+                               <span class="n">values</span><span class="o">=</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;nombre&quot;</span><span class="p">],</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;dni&quot;</span><span class="p">],</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;telefono&quot;</span><span class="p">],</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;email&quot;</span><span class="p">]))</span></div>
+
+
+    <span class="c1"># -------- VALIDACIONES (SOCIOS) --------</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_validar_socio_campos</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reglas:</span>
+<span class="sd">        - TODOS obligatorios: nombre, dni, teléfono, email.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">var_socio_nombre</span><span class="o">.</span><span class="n">get</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;El campo &#39;Nombre&#39; del socio es obligatorio.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">var_socio_dni</span><span class="o">.</span><span class="n">get</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;El campo &#39;DNI&#39; del socio es obligatorio.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">var_socio_tel</span><span class="o">.</span><span class="n">get</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;El campo &#39;Teléfono&#39; del socio es obligatorio.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">var_socio_email</span><span class="o">.</span><span class="n">get</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;El campo &#39;Email&#39; del socio es obligatorio.&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="BibliotecaController.guardar_socio">
+<a class="viewcode-back" href="../../../proyectoPY.controller.html#proyectoPY.controller.controller.BibliotecaController.guardar_socio">[documentos]</a>
+    <span class="nd">@with_transaction</span><span class="p">(</span><span class="n">db</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">guardar_socio</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Crea un socio con todos los campos obligatorios.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_validar_socio_campos</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">socio_crear</span><span class="p">(</span>
+                <span class="n">nombre</span><span class="o">=</span><span class="n">var_socio_nombre</span><span class="o">.</span><span class="n">get</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
+                <span class="n">dni</span><span class="o">=</span><span class="n">var_socio_dni</span><span class="o">.</span><span class="n">get</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
+                <span class="n">telefono</span><span class="o">=</span><span class="n">var_socio_tel</span><span class="o">.</span><span class="n">get</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
+                <span class="n">email</span><span class="o">=</span><span class="n">var_socio_email</span><span class="o">.</span><span class="n">get</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">actualizar_socios</span><span class="p">()</span>
+            <span class="n">messagebox</span><span class="o">.</span><span class="n">showinfo</span><span class="p">(</span><span class="s2">&quot;OK&quot;</span><span class="p">,</span> <span class="s2">&quot;Socio agregado.&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">messagebox</span><span class="o">.</span><span class="n">showerror</span><span class="p">(</span><span class="s2">&quot;Error&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="BibliotecaController.modificar_socio">
+<a class="viewcode-back" href="../../../proyectoPY.controller.html#proyectoPY.controller.controller.BibliotecaController.modificar_socio">[documentos]</a>
+    <span class="nd">@with_transaction</span><span class="p">(</span><span class="n">db</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">modificar_socio</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Modifica socio seleccionado con validaciones.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">sel</span> <span class="o">=</span> <span class="n">tree_socios</span><span class="o">.</span><span class="n">focus</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">sel</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">messagebox</span><span class="o">.</span><span class="n">showwarning</span><span class="p">(</span><span class="s2">&quot;Seleccionar&quot;</span><span class="p">,</span> <span class="s2">&quot;Seleccione un socio.&quot;</span><span class="p">)</span>
+        <span class="n">id_socio</span> <span class="o">=</span> <span class="n">tree_socios</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">sel</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_validar_socio_campos</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">socio_modificar</span><span class="p">(</span>
+                <span class="n">id_socio</span><span class="p">,</span>
+                <span class="n">nombre</span><span class="o">=</span><span class="n">var_socio_nombre</span><span class="o">.</span><span class="n">get</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
+                <span class="n">dni</span><span class="o">=</span><span class="n">var_socio_dni</span><span class="o">.</span><span class="n">get</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
+                <span class="n">telefono</span><span class="o">=</span><span class="n">var_socio_tel</span><span class="o">.</span><span class="n">get</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
+                <span class="n">email</span><span class="o">=</span><span class="n">var_socio_email</span><span class="o">.</span><span class="n">get</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">actualizar_socios</span><span class="p">()</span>
+            <span class="n">messagebox</span><span class="o">.</span><span class="n">showinfo</span><span class="p">(</span><span class="s2">&quot;OK&quot;</span><span class="p">,</span> <span class="s2">&quot;Socio modificado.&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">messagebox</span><span class="o">.</span><span class="n">showerror</span><span class="p">(</span><span class="s2">&quot;Error&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="BibliotecaController.eliminar_socio">
+<a class="viewcode-back" href="../../../proyectoPY.controller.html#proyectoPY.controller.controller.BibliotecaController.eliminar_socio">[documentos]</a>
+    <span class="nd">@with_transaction</span><span class="p">(</span><span class="n">db</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">eliminar_socio</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Elimina socio seleccionado.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">sel</span> <span class="o">=</span> <span class="n">tree_socios</span><span class="o">.</span><span class="n">focus</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">sel</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">messagebox</span><span class="o">.</span><span class="n">showwarning</span><span class="p">(</span><span class="s2">&quot;Seleccionar&quot;</span><span class="p">,</span> <span class="s2">&quot;Seleccione un socio.&quot;</span><span class="p">)</span>
+        <span class="n">id_socio</span> <span class="o">=</span> <span class="n">tree_socios</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">sel</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">socio_eliminar</span><span class="p">(</span><span class="n">id_socio</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actualizar_socios</span><span class="p">()</span>
+        <span class="n">messagebox</span><span class="o">.</span><span class="n">showinfo</span><span class="p">(</span><span class="s2">&quot;OK&quot;</span><span class="p">,</span> <span class="s2">&quot;Socio eliminado.&quot;</span><span class="p">)</span></div>
+
+
+    <span class="c1"># ======================================================================</span>
+    <span class="c1"># UI PRÉSTAMO – sin cambiar de pestaña</span>
+    <span class="c1"># ======================================================================</span>
+<div class="viewcode-block" id="BibliotecaController.ui_prestar">
+<a class="viewcode-back" href="../../../proyectoPY.controller.html#proyectoPY.controller.controller.BibliotecaController.ui_prestar">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ui_prestar</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Abre una ventana modal para elegir socio (con buscador) y registrar el préstamo</span>
+<span class="sd">        del libro actualmente seleccionado en el TreeView.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">id_libro</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_libro_seleccionado_id</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">id_libro</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">messagebox</span><span class="o">.</span><span class="n">showwarning</span><span class="p">(</span><span class="s2">&quot;Seleccionar&quot;</span><span class="p">,</span> <span class="s2">&quot;Seleccione un libro para prestar.&quot;</span><span class="p">)</span>
+
+        <span class="n">win</span> <span class="o">=</span> <span class="n">Toplevel</span><span class="p">(</span><span class="n">ventana_principal</span><span class="p">)</span>
+        <span class="n">win</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Seleccionar socio para préstamo&quot;</span><span class="p">)</span>
+        <span class="n">win</span><span class="o">.</span><span class="n">geometry</span><span class="p">(</span><span class="s2">&quot;660x440&quot;</span><span class="p">)</span>
+
+        <span class="n">Label</span><span class="p">(</span><span class="n">win</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Buscar socio (nombre / email / DNI):&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">anchor</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+        <span class="n">q</span> <span class="o">=</span> <span class="n">StringVar</span><span class="p">()</span>
+        <span class="n">ent</span> <span class="o">=</span> <span class="n">Entry</span><span class="p">(</span><span class="n">win</span><span class="p">,</span> <span class="n">textvariable</span><span class="o">=</span><span class="n">q</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">44</span><span class="p">)</span>
+        <span class="n">ent</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">anchor</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+        <span class="n">ent</span><span class="o">.</span><span class="n">focus_set</span><span class="p">()</span>
+
+        <span class="n">tree</span> <span class="o">=</span> <span class="n">ttk</span><span class="o">.</span><span class="n">Treeview</span><span class="p">(</span><span class="n">win</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;nombre&quot;</span><span class="p">,</span><span class="s2">&quot;dni&quot;</span><span class="p">,</span><span class="s2">&quot;tel&quot;</span><span class="p">,</span><span class="s2">&quot;email&quot;</span><span class="p">),</span> <span class="n">show</span><span class="o">=</span><span class="s2">&quot;headings&quot;</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">col</span><span class="p">,</span> <span class="n">txt</span><span class="p">,</span> <span class="n">w</span> <span class="ow">in</span> <span class="p">[(</span><span class="s2">&quot;nombre&quot;</span><span class="p">,</span><span class="s2">&quot;Nombre&quot;</span><span class="p">,</span><span class="mi">240</span><span class="p">),(</span><span class="s2">&quot;dni&quot;</span><span class="p">,</span><span class="s2">&quot;DNI&quot;</span><span class="p">,</span><span class="mi">110</span><span class="p">),(</span><span class="s2">&quot;tel&quot;</span><span class="p">,</span><span class="s2">&quot;Teléfono&quot;</span><span class="p">,</span><span class="mi">120</span><span class="p">),(</span><span class="s2">&quot;email&quot;</span><span class="p">,</span><span class="s2">&quot;Email&quot;</span><span class="p">,</span><span class="mi">160</span><span class="p">)]:</span>
+            <span class="n">tree</span><span class="o">.</span><span class="n">heading</span><span class="p">(</span><span class="n">col</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">txt</span><span class="p">)</span>
+            <span class="n">tree</span><span class="o">.</span><span class="n">column</span><span class="p">(</span><span class="n">col</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">w</span><span class="p">,</span> <span class="n">anchor</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">)</span>
+        <span class="n">tree</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">fill</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">,</span> <span class="n">expand</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">cargar</span><span class="p">(</span><span class="n">filtro</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+            <span class="n">tree</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="o">*</span><span class="n">tree</span><span class="o">.</span><span class="n">get_children</span><span class="p">())</span>
+            <span class="n">filtro</span> <span class="o">=</span> <span class="n">filtro</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">socios_todos</span><span class="p">():</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">filtro</span> <span class="ow">in</span> <span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;nombre&quot;</span><span class="p">]</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+                    <span class="ow">or</span> <span class="n">filtro</span> <span class="ow">in</span> <span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;email&quot;</span><span class="p">]</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+                    <span class="ow">or</span> <span class="n">filtro</span> <span class="ow">in</span> <span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;dni&quot;</span><span class="p">]</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()):</span>
+                    <span class="n">tree</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;end&quot;</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">],</span>
+                                <span class="n">values</span><span class="o">=</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;nombre&quot;</span><span class="p">],</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;dni&quot;</span><span class="p">],</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;telefono&quot;</span><span class="p">],</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;email&quot;</span><span class="p">]))</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">on_dbl</span><span class="p">(</span><span class="n">_</span><span class="p">):</span>
+            <span class="n">sel</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">focus</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">sel</span><span class="p">:</span>
+                <span class="k">return</span>
+            <span class="n">id_socio</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">sel</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">prestar</span><span class="p">(</span><span class="n">id_libro</span><span class="p">,</span> <span class="n">id_socio</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">actualizar_libros</span><span class="p">()</span>
+                <span class="n">messagebox</span><span class="o">.</span><span class="n">showinfo</span><span class="p">(</span><span class="s2">&quot;OK&quot;</span><span class="p">,</span> <span class="s2">&quot;Préstamo registrado.&quot;</span><span class="p">)</span>
+                <span class="n">win</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">messagebox</span><span class="o">.</span><span class="n">showerror</span><span class="p">(</span><span class="s2">&quot;Error&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+
+        <span class="c1"># Alta rápida (mínima) → nombre + email</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">alta_rapida</span><span class="p">():</span>
+            <span class="n">nombre</span> <span class="o">=</span> <span class="n">askstring</span><span class="p">(</span><span class="s2">&quot;Alta rápida&quot;</span><span class="p">,</span> <span class="s2">&quot;Nombre del socio:&quot;</span><span class="p">)</span>
+            <span class="n">email</span> <span class="o">=</span> <span class="n">askstring</span><span class="p">(</span><span class="s2">&quot;Alta rápida&quot;</span><span class="p">,</span> <span class="s2">&quot;Email del socio:&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">nombre</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">email</span><span class="p">:</span>
+                <span class="n">messagebox</span><span class="o">.</span><span class="n">showwarning</span><span class="p">(</span><span class="s2">&quot;Validación&quot;</span><span class="p">,</span> <span class="s2">&quot;Nombre y Email son obligatorios para alta rápida.&quot;</span><span class="p">)</span>
+                <span class="k">return</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">socio_crear</span><span class="p">(</span><span class="n">nombre</span><span class="o">=</span><span class="n">nombre</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="n">email</span><span class="o">=</span><span class="n">email</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">actualizar_socios</span><span class="p">()</span>
+                <span class="n">cargar</span><span class="p">(</span><span class="n">q</span><span class="o">.</span><span class="n">get</span><span class="p">())</span>
+                <span class="n">messagebox</span><span class="o">.</span><span class="n">showinfo</span><span class="p">(</span><span class="s2">&quot;OK&quot;</span><span class="p">,</span> <span class="s2">&quot;Socio creado.&quot;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">messagebox</span><span class="o">.</span><span class="n">showerror</span><span class="p">(</span><span class="s2">&quot;Error&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+
+        <span class="c1"># Bindings y botones</span>
+        <span class="n">q</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="k">lambda</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">cargar</span><span class="p">(</span><span class="n">q</span><span class="o">.</span><span class="n">get</span><span class="p">()))</span>
+        <span class="n">tree</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="s2">&quot;&lt;Double-1&gt;&quot;</span><span class="p">,</span> <span class="n">on_dbl</span><span class="p">)</span>
+        <span class="n">Button</span><span class="p">(</span><span class="n">win</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Alta rápida de socio&quot;</span><span class="p">,</span> <span class="n">command</span><span class="o">=</span><span class="n">alta_rapida</span><span class="p">)</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">pady</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+
+        <span class="n">cargar</span><span class="p">()</span></div>
+
+
+    <span class="c1"># ======================================================================</span>
+    <span class="c1"># UI DEVOLUCIÓN – listar préstamos activos y elegir uno</span>
+    <span class="c1"># ======================================================================</span>
+<div class="viewcode-block" id="BibliotecaController.ui_devolver">
+<a class="viewcode-back" href="../../../proyectoPY.controller.html#proyectoPY.controller.controller.BibliotecaController.ui_devolver">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ui_devolver</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Abre ventana modal con los préstamos activos del libro seleccionado para</span>
+<span class="sd">        elegir y devolver (sin ingresar ID).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">id_libro</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_libro_seleccionado_id</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">id_libro</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">messagebox</span><span class="o">.</span><span class="n">showwarning</span><span class="p">(</span><span class="s2">&quot;Seleccionar&quot;</span><span class="p">,</span> <span class="s2">&quot;Seleccione un libro con préstamos activos.&quot;</span><span class="p">)</span>
+
+        <span class="n">prestamos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">prestamos_activos_por_libro</span><span class="p">(</span><span class="n">id_libro</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">prestamos</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">messagebox</span><span class="o">.</span><span class="n">showinfo</span><span class="p">(</span><span class="s2">&quot;Info&quot;</span><span class="p">,</span> <span class="s2">&quot;No hay préstamos activos para ese libro.&quot;</span><span class="p">)</span>
+
+        <span class="n">win</span> <span class="o">=</span> <span class="n">Toplevel</span><span class="p">(</span><span class="n">ventana_principal</span><span class="p">)</span>
+        <span class="n">win</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Devolver préstamo&quot;</span><span class="p">)</span>
+        <span class="n">win</span><span class="o">.</span><span class="n">geometry</span><span class="p">(</span><span class="s2">&quot;600x380&quot;</span><span class="p">)</span>
+
+        <span class="n">tree</span> <span class="o">=</span> <span class="n">ttk</span><span class="o">.</span><span class="n">Treeview</span><span class="p">(</span><span class="n">win</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;prestamo_id&quot;</span><span class="p">,</span><span class="s2">&quot;socio&quot;</span><span class="p">,</span><span class="s2">&quot;fecha&quot;</span><span class="p">),</span> <span class="n">show</span><span class="o">=</span><span class="s2">&quot;headings&quot;</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">col</span><span class="p">,</span> <span class="n">txt</span><span class="p">,</span> <span class="n">w</span> <span class="ow">in</span> <span class="p">[(</span><span class="s2">&quot;prestamo_id&quot;</span><span class="p">,</span><span class="s2">&quot;ID&quot;</span><span class="p">,</span><span class="mi">90</span><span class="p">),(</span><span class="s2">&quot;socio&quot;</span><span class="p">,</span><span class="s2">&quot;Socio&quot;</span><span class="p">,</span><span class="mi">290</span><span class="p">),(</span><span class="s2">&quot;fecha&quot;</span><span class="p">,</span><span class="s2">&quot;Fecha préstamo&quot;</span><span class="p">,</span><span class="mi">180</span><span class="p">)]:</span>
+            <span class="n">tree</span><span class="o">.</span><span class="n">heading</span><span class="p">(</span><span class="n">col</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">txt</span><span class="p">)</span>
+            <span class="n">tree</span><span class="o">.</span><span class="n">column</span><span class="p">(</span><span class="n">col</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">w</span><span class="p">,</span> <span class="n">anchor</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">)</span>
+        <span class="n">tree</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">fill</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">,</span> <span class="n">expand</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">prestamos</span><span class="p">:</span>
+            <span class="n">tree</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;end&quot;</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">p</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">],</span> <span class="n">values</span><span class="o">=</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">],</span> <span class="n">p</span><span class="p">[</span><span class="s2">&quot;socio&quot;</span><span class="p">],</span> <span class="n">p</span><span class="p">[</span><span class="s2">&quot;fecha_prestamo&quot;</span><span class="p">]))</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">devolver_sel</span><span class="p">():</span>
+            <span class="n">sel</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">focus</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">sel</span><span class="p">:</span>
+                <span class="k">return</span>
+            <span class="n">pid</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">sel</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">devolver</span><span class="p">(</span><span class="n">pid</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">actualizar_libros</span><span class="p">()</span>
+                <span class="n">messagebox</span><span class="o">.</span><span class="n">showinfo</span><span class="p">(</span><span class="s2">&quot;OK&quot;</span><span class="p">,</span> <span class="s2">&quot;Devolución registrada.&quot;</span><span class="p">)</span>
+                <span class="n">win</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">messagebox</span><span class="o">.</span><span class="n">showerror</span><span class="p">(</span><span class="s2">&quot;Error&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+
+        <span class="n">Button</span><span class="p">(</span><span class="n">win</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Devolver seleccionado&quot;</span><span class="p">,</span> <span class="n">command</span><span class="o">=</span><span class="n">devolver_sel</span><span class="p">)</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">pady</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span></div>
+
+
+    <span class="c1"># ======================================================================</span>
+    <span class="c1"># UI CONSULTAS – Libros y Socios</span>
+    <span class="c1"># ======================================================================</span>
+<div class="viewcode-block" id="BibliotecaController.ui_consultar_libros">
+<a class="viewcode-back" href="../../../proyectoPY.controller.html#proyectoPY.controller.controller.BibliotecaController.ui_consultar_libros">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ui_consultar_libros</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Ventana de consulta de libros con buscador (título/autor/categoría).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">win</span> <span class="o">=</span> <span class="n">Toplevel</span><span class="p">(</span><span class="n">ventana_principal</span><span class="p">)</span>
+        <span class="n">win</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Consultar Libros&quot;</span><span class="p">)</span>
+        <span class="n">win</span><span class="o">.</span><span class="n">geometry</span><span class="p">(</span><span class="s2">&quot;780x500&quot;</span><span class="p">)</span>
+
+        <span class="n">Label</span><span class="p">(</span><span class="n">win</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Buscar (Título / Autor / Categoría):&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">anchor</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+        <span class="n">q</span> <span class="o">=</span> <span class="n">StringVar</span><span class="p">()</span>
+        <span class="n">ent</span> <span class="o">=</span> <span class="n">Entry</span><span class="p">(</span><span class="n">win</span><span class="p">,</span> <span class="n">textvariable</span><span class="o">=</span><span class="n">q</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">52</span><span class="p">)</span>
+        <span class="n">ent</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">anchor</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+        <span class="n">ent</span><span class="o">.</span><span class="n">focus_set</span><span class="p">()</span>
+
+        <span class="n">tree</span> <span class="o">=</span> <span class="n">ttk</span><span class="o">.</span><span class="n">Treeview</span><span class="p">(</span><span class="n">win</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;titulo&quot;</span><span class="p">,</span><span class="s2">&quot;autor&quot;</span><span class="p">,</span><span class="s2">&quot;categoria&quot;</span><span class="p">,</span><span class="s2">&quot;cant&quot;</span><span class="p">,</span><span class="s2">&quot;precio&quot;</span><span class="p">),</span> <span class="n">show</span><span class="o">=</span><span class="s2">&quot;headings&quot;</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">col</span><span class="p">,</span> <span class="n">txt</span><span class="p">,</span> <span class="n">w</span> <span class="ow">in</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s2">&quot;titulo&quot;</span><span class="p">,</span><span class="s2">&quot;Título&quot;</span><span class="p">,</span><span class="mi">260</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;autor&quot;</span><span class="p">,</span><span class="s2">&quot;Autor&quot;</span><span class="p">,</span><span class="mi">220</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;categoria&quot;</span><span class="p">,</span><span class="s2">&quot;Categoría&quot;</span><span class="p">,</span><span class="mi">160</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;cant&quot;</span><span class="p">,</span><span class="s2">&quot;Cant.&quot;</span><span class="p">,</span><span class="mi">70</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;precio&quot;</span><span class="p">,</span><span class="s2">&quot;Precio&quot;</span><span class="p">,</span><span class="mi">90</span><span class="p">),</span>
+        <span class="p">]:</span>
+            <span class="n">tree</span><span class="o">.</span><span class="n">heading</span><span class="p">(</span><span class="n">col</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">txt</span><span class="p">)</span>
+            <span class="n">tree</span><span class="o">.</span><span class="n">column</span><span class="p">(</span><span class="n">col</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">w</span><span class="p">,</span> <span class="n">anchor</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">)</span>
+        <span class="n">tree</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">fill</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">,</span> <span class="n">expand</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">cargar</span><span class="p">(</span><span class="n">f</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+            <span class="n">tree</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="o">*</span><span class="n">tree</span><span class="o">.</span><span class="n">get_children</span><span class="p">())</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">libros_todos</span><span class="p">():</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">f</span> <span class="ow">in</span> <span class="n">l</span><span class="p">[</span><span class="s2">&quot;titulo&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+                    <span class="ow">or</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">l</span><span class="p">[</span><span class="s2">&quot;autor&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+                    <span class="ow">or</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">l</span><span class="p">[</span><span class="s2">&quot;categoria&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()):</span>
+                    <span class="n">tree</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;end&quot;</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">l</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">],</span>
+                                <span class="n">values</span><span class="o">=</span><span class="p">(</span><span class="n">l</span><span class="p">[</span><span class="s2">&quot;titulo&quot;</span><span class="p">],</span> <span class="n">l</span><span class="p">[</span><span class="s2">&quot;autor&quot;</span><span class="p">],</span> <span class="n">l</span><span class="p">[</span><span class="s2">&quot;categoria&quot;</span><span class="p">],</span> <span class="n">l</span><span class="p">[</span><span class="s2">&quot;cantidad&quot;</span><span class="p">],</span> <span class="n">l</span><span class="p">[</span><span class="s2">&quot;precio&quot;</span><span class="p">]))</span>
+
+        <span class="n">q</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="k">lambda</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">cargar</span><span class="p">(</span><span class="n">q</span><span class="o">.</span><span class="n">get</span><span class="p">()))</span>
+        <span class="n">cargar</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="BibliotecaController.ui_consultar_socios">
+<a class="viewcode-back" href="../../../proyectoPY.controller.html#proyectoPY.controller.controller.BibliotecaController.ui_consultar_socios">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ui_consultar_socios</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Ventana de consulta de socios con buscador (nombre/DNI/email).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">win</span> <span class="o">=</span> <span class="n">Toplevel</span><span class="p">(</span><span class="n">ventana_principal</span><span class="p">)</span>
+        <span class="n">win</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Consultar Socios&quot;</span><span class="p">)</span>
+        <span class="n">win</span><span class="o">.</span><span class="n">geometry</span><span class="p">(</span><span class="s2">&quot;720x470&quot;</span><span class="p">)</span>
+
+        <span class="n">Label</span><span class="p">(</span><span class="n">win</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Buscar (Nombre / DNI / Email):&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">anchor</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+        <span class="n">q</span> <span class="o">=</span> <span class="n">StringVar</span><span class="p">()</span>
+        <span class="n">ent</span> <span class="o">=</span> <span class="n">Entry</span><span class="p">(</span><span class="n">win</span><span class="p">,</span> <span class="n">textvariable</span><span class="o">=</span><span class="n">q</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">44</span><span class="p">)</span>
+        <span class="n">ent</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">anchor</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+        <span class="n">ent</span><span class="o">.</span><span class="n">focus_set</span><span class="p">()</span>
+
+        <span class="n">tree</span> <span class="o">=</span> <span class="n">ttk</span><span class="o">.</span><span class="n">Treeview</span><span class="p">(</span><span class="n">win</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;nombre&quot;</span><span class="p">,</span><span class="s2">&quot;dni&quot;</span><span class="p">,</span><span class="s2">&quot;tel&quot;</span><span class="p">,</span><span class="s2">&quot;email&quot;</span><span class="p">),</span> <span class="n">show</span><span class="o">=</span><span class="s2">&quot;headings&quot;</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">col</span><span class="p">,</span> <span class="n">txt</span><span class="p">,</span> <span class="n">w</span> <span class="ow">in</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s2">&quot;nombre&quot;</span><span class="p">,</span><span class="s2">&quot;Nombre&quot;</span><span class="p">,</span><span class="mi">260</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;dni&quot;</span><span class="p">,</span><span class="s2">&quot;DNI&quot;</span><span class="p">,</span><span class="mi">120</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;tel&quot;</span><span class="p">,</span><span class="s2">&quot;Teléfono&quot;</span><span class="p">,</span><span class="mi">140</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;email&quot;</span><span class="p">,</span><span class="s2">&quot;Email&quot;</span><span class="p">,</span><span class="mi">200</span><span class="p">),</span>
+        <span class="p">]:</span>
+            <span class="n">tree</span><span class="o">.</span><span class="n">heading</span><span class="p">(</span><span class="n">col</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">txt</span><span class="p">)</span>
+            <span class="n">tree</span><span class="o">.</span><span class="n">column</span><span class="p">(</span><span class="n">col</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">w</span><span class="p">,</span> <span class="n">anchor</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">)</span>
+        <span class="n">tree</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">fill</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">,</span> <span class="n">expand</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">cargar</span><span class="p">(</span><span class="n">f</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+            <span class="n">tree</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="o">*</span><span class="n">tree</span><span class="o">.</span><span class="n">get_children</span><span class="p">())</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">socios_todos</span><span class="p">():</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">f</span> <span class="ow">in</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;nombre&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+                    <span class="ow">or</span> <span class="n">f</span> <span class="ow">in</span> <span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;dni&quot;</span><span class="p">]</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+                    <span class="ow">or</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;email&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()):</span>
+                    <span class="n">tree</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;end&quot;</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">],</span>
+                                <span class="n">values</span><span class="o">=</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;nombre&quot;</span><span class="p">],</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;dni&quot;</span><span class="p">],</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;telefono&quot;</span><span class="p">],</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;email&quot;</span><span class="p">]))</span>
+
+        <span class="n">q</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="k">lambda</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">cargar</span><span class="p">(</span><span class="n">q</span><span class="o">.</span><span class="n">get</span><span class="p">()))</span>
+        <span class="n">cargar</span><span class="p">()</span></div>
+
+
+    <span class="c1"># ======================================================================</span>
+    <span class="c1"># EXPORT</span>
+    <span class="c1"># ======================================================================</span>
+<div class="viewcode-block" id="BibliotecaController.exportar_libros">
+<a class="viewcode-back" href="../../../proyectoPY.controller.html#proyectoPY.controller.controller.BibliotecaController.exportar_libros">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">exportar_libros</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Genera export_libros.csv en la carpeta del proyecto.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">exportar_libros_csv</span><span class="p">()</span>
+        <span class="n">messagebox</span><span class="o">.</span><span class="n">showinfo</span><span class="p">(</span><span class="s2">&quot;Exportado&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Se generó: </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="BibliotecaController.exportar_socios">
+<a class="viewcode-back" href="../../../proyectoPY.controller.html#proyectoPY.controller.controller.BibliotecaController.exportar_socios">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">exportar_socios</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Genera export_socios.csv en la carpeta del proyecto.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">exportar_socios_csv</span><span class="p">()</span>
+        <span class="n">messagebox</span><span class="o">.</span><span class="n">showinfo</span><span class="p">(</span><span class="s2">&quot;Exportado&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Se generó: </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Derechos de autor .</p>
+  </div>
+
+  Compilado con <a href="https://www.sphinx-doc.org/">Sphinx</a> usando un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">tema</a>
+    proporcionado por <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

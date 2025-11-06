@@ -1,12 +1,12 @@
-Proyecto Vivero documentation
-=============================
+Biblioteca Popular Nelly Llorens
+================================
 
-Add your content using ``reStructuredText`` syntax. See the
-`reStructuredText <https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html>`_
-documentation for details.
+Sistema de gestión de biblioteca con interfaz gráfica (Tkinter), base de datos
+MySQL (Peewee ORM), patrón MVC, patrón Observador y documentación generada
+automáticamente con Sphinx.
 
-Contenido
----------
+Contenidos
+----------
 
 .. toctree::
    :maxdepth: 2
@@ -14,9 +14,10 @@ Contenido
 
    proyectoPY
    proyectoPY.controller
+   proyectoPY.model
    proyectoPY.view
-   main
-   modules
+   proyectoPY.patterns
+   proyectoPY.infra
 
 
 

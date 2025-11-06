@@ -1,0 +1,335 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="es" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>proyectoPY.model.model &mdash; documentación de Biblioteca Popular Nelly Llorens - 1.0.0</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=36c4ab74"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../_static/translations.js?v=f85f4cfb"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Índice" href="../../../genindex.html" />
+    <link rel="search" title="Búsqueda" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Biblioteca Popular Nelly Llorens
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Buscar documentos" aria-label="Buscar documentos" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Módulos del sistema:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../main.html">proyectoPY.main module</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Biblioteca Popular Nelly Llorens</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Código de módulo</a></li>
+      <li class="breadcrumb-item active">proyectoPY.model.model</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Código fuente para proyectoPY.model.model</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Módulo model</span>
+<span class="sd">------------</span>
+
+<span class="sd">Define los modelos ORM y la clase `BibliotecaModel` responsable de la lógica</span>
+<span class="sd">de base de datos para la Biblioteca Popular Nelly Llorens.</span>
+
+<span class="sd">Responsabilidades:</span>
+<span class="sd">- Conexión a MySQL.</span>
+<span class="sd">- Definición de tablas ORM (Libro, Socio, Prestamo).</span>
+<span class="sd">- CRUD de Libros y Socios.</span>
+<span class="sd">- Registro de Préstamos y Devoluciones.</span>
+<span class="sd">- Publicación de eventos (Observer).</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">pymysql</span>
+<span class="n">pymysql</span><span class="o">.</span><span class="n">install_as_MySQLdb</span><span class="p">()</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">peewee</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
+
+<span class="c1"># ----------------- CONEXIÓN MYSQL -----------------</span>
+<span class="n">db</span> <span class="o">=</span> <span class="n">MySQLDatabase</span><span class="p">(</span>
+    <span class="s1">&#39;biblioteca_db&#39;</span><span class="p">,</span>
+    <span class="n">user</span><span class="o">=</span><span class="s1">&#39;root&#39;</span><span class="p">,</span>
+    <span class="n">password</span><span class="o">=</span><span class="s1">&#39;Secu2015$&#39;</span><span class="p">,</span>
+    <span class="n">host</span><span class="o">=</span><span class="s1">&#39;localhost&#39;</span><span class="p">,</span>
+    <span class="n">port</span><span class="o">=</span><span class="mi">3306</span>
+<span class="p">)</span>
+
+<div class="viewcode-block" id="BaseModel">
+<a class="viewcode-back" href="../../../proyectoPY.model.html#proyectoPY.model.model.BaseModel">[documentos]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">BaseModel</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">database</span> <span class="o">=</span> <span class="n">db</span></div>
+
+
+<span class="c1"># ----------------- TABLAS -----------------</span>
+<div class="viewcode-block" id="Libro">
+<a class="viewcode-back" href="../../../proyectoPY.model.html#proyectoPY.model.model.Libro">[documentos]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Libro</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="nb">id</span> <span class="o">=</span> <span class="n">AutoField</span><span class="p">()</span>
+    <span class="n">titulo</span> <span class="o">=</span> <span class="n">CharField</span><span class="p">(</span><span class="n">unique</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">autor</span> <span class="o">=</span> <span class="n">CharField</span><span class="p">()</span>
+    <span class="n">categoria</span> <span class="o">=</span> <span class="n">CharField</span><span class="p">()</span>
+    <span class="n">editorial</span> <span class="o">=</span> <span class="n">CharField</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">anio</span> <span class="o">=</span> <span class="n">IntegerField</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">pais</span> <span class="o">=</span> <span class="n">CharField</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">ubicacion</span> <span class="o">=</span> <span class="n">CharField</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">cantidad</span> <span class="o">=</span> <span class="n">IntegerField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">precio</span> <span class="o">=</span> <span class="n">CharField</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Socio">
+<a class="viewcode-back" href="../../../proyectoPY.model.html#proyectoPY.model.model.Socio">[documentos]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Socio</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="nb">id</span> <span class="o">=</span> <span class="n">AutoField</span><span class="p">()</span>
+    <span class="n">nombre</span> <span class="o">=</span> <span class="n">CharField</span><span class="p">()</span>
+    <span class="n">dni</span> <span class="o">=</span> <span class="n">CharField</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">telefono</span> <span class="o">=</span> <span class="n">CharField</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">email</span> <span class="o">=</span> <span class="n">CharField</span><span class="p">(</span><span class="n">unique</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Prestamo">
+<a class="viewcode-back" href="../../../proyectoPY.model.html#proyectoPY.model.model.Prestamo">[documentos]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Prestamo</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="nb">id</span> <span class="o">=</span> <span class="n">AutoField</span><span class="p">()</span>
+    <span class="n">libro</span> <span class="o">=</span> <span class="n">ForeignKeyField</span><span class="p">(</span><span class="n">Libro</span><span class="p">,</span> <span class="n">backref</span><span class="o">=</span><span class="s2">&quot;prestamos&quot;</span><span class="p">)</span>
+    <span class="n">socio</span> <span class="o">=</span> <span class="n">ForeignKeyField</span><span class="p">(</span><span class="n">Socio</span><span class="p">,</span> <span class="n">backref</span><span class="o">=</span><span class="s2">&quot;prestamos&quot;</span><span class="p">)</span>
+    <span class="n">fecha_prestamo</span> <span class="o">=</span> <span class="n">DateTimeField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">)</span>
+    <span class="n">fecha_devolucion</span> <span class="o">=</span> <span class="n">DateTimeField</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># ----------------- OBSERVER (EVENTOS) -----------------</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">proyectoPY.patterns.observer</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">event_bus</span><span class="p">,</span>
+    <span class="n">EVT_LIBRO_CREADO</span><span class="p">,</span> <span class="n">EVT_LIBRO_MODIFICADO</span><span class="p">,</span> <span class="n">EVT_LIBRO_ELIMINADO</span><span class="p">,</span>
+    <span class="n">EVT_SOCIO_CREADO</span><span class="p">,</span>
+    <span class="n">EVT_PRESTAMO_REALIZADO</span><span class="p">,</span> <span class="n">EVT_DEVOLUCION_REGISTRADA</span>
+<span class="p">)</span>
+
+<span class="c1"># ----------------- LÓGICA -----------------</span>
+<div class="viewcode-block" id="BibliotecaModel">
+<a class="viewcode-back" href="../../../proyectoPY.model.html#proyectoPY.model.model.BibliotecaModel">[documentos]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">BibliotecaModel</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Maneja toda la lógica de datos de Biblioteca.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">db</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">reuse_if_open</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">db</span><span class="o">.</span><span class="n">create_tables</span><span class="p">([</span><span class="n">Libro</span><span class="p">,</span> <span class="n">Socio</span><span class="p">,</span> <span class="n">Prestamo</span><span class="p">])</span>
+
+    <span class="c1"># ================= LIBROS =================</span>
+<div class="viewcode-block" id="BibliotecaModel.libros_todos">
+<a class="viewcode-back" href="../../../proyectoPY.model.html#proyectoPY.model.model.BibliotecaModel.libros_todos">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">libros_todos</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">libros</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">Libro</span><span class="o">.</span><span class="n">select</span><span class="p">():</span>
+            <span class="n">libros</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+                <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">l</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                <span class="s2">&quot;titulo&quot;</span><span class="p">:</span> <span class="n">l</span><span class="o">.</span><span class="n">titulo</span><span class="p">,</span>
+                <span class="s2">&quot;autor&quot;</span><span class="p">:</span> <span class="n">l</span><span class="o">.</span><span class="n">autor</span><span class="p">,</span>
+                <span class="s2">&quot;categoria&quot;</span><span class="p">:</span> <span class="n">l</span><span class="o">.</span><span class="n">categoria</span><span class="p">,</span>
+                <span class="s2">&quot;editorial&quot;</span><span class="p">:</span> <span class="n">l</span><span class="o">.</span><span class="n">editorial</span><span class="p">,</span>
+                <span class="s2">&quot;anio&quot;</span><span class="p">:</span> <span class="n">l</span><span class="o">.</span><span class="n">anio</span><span class="p">,</span>
+                <span class="s2">&quot;pais&quot;</span><span class="p">:</span> <span class="n">l</span><span class="o">.</span><span class="n">pais</span><span class="p">,</span>
+                <span class="s2">&quot;ubicacion&quot;</span><span class="p">:</span> <span class="n">l</span><span class="o">.</span><span class="n">ubicacion</span><span class="p">,</span>
+                <span class="s2">&quot;cantidad&quot;</span><span class="p">:</span> <span class="n">l</span><span class="o">.</span><span class="n">cantidad</span><span class="p">,</span>
+                <span class="s2">&quot;precio&quot;</span><span class="p">:</span> <span class="n">l</span><span class="o">.</span><span class="n">precio</span>
+            <span class="p">})</span>
+        <span class="k">return</span> <span class="n">libros</span></div>
+
+
+<div class="viewcode-block" id="BibliotecaModel.libro_crear">
+<a class="viewcode-back" href="../../../proyectoPY.model.html#proyectoPY.model.model.BibliotecaModel.libro_crear">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">libro_crear</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">datos</span><span class="p">):</span>
+        <span class="n">l</span> <span class="o">=</span> <span class="n">Libro</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="o">**</span><span class="n">datos</span><span class="p">)</span>
+        <span class="n">event_bus</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="n">EVT_LIBRO_CREADO</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">l</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="s2">&quot;titulo&quot;</span><span class="p">:</span> <span class="n">l</span><span class="o">.</span><span class="n">titulo</span><span class="p">})</span>
+        <span class="k">return</span> <span class="n">l</span></div>
+
+
+<div class="viewcode-block" id="BibliotecaModel.libro_modificar">
+<a class="viewcode-back" href="../../../proyectoPY.model.html#proyectoPY.model.model.BibliotecaModel.libro_modificar">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">libro_modificar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">id_libro</span><span class="p">,</span> <span class="o">**</span><span class="n">datos</span><span class="p">):</span>
+        <span class="n">l</span> <span class="o">=</span> <span class="n">Libro</span><span class="o">.</span><span class="n">get_or_none</span><span class="p">(</span><span class="n">Libro</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">id_libro</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">l</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">campo</span><span class="p">,</span> <span class="n">valor</span> <span class="ow">in</span> <span class="n">datos</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">campo</span><span class="p">,</span> <span class="n">valor</span><span class="p">)</span>
+            <span class="n">l</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+            <span class="n">event_bus</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="n">EVT_LIBRO_MODIFICADO</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">l</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="s2">&quot;titulo&quot;</span><span class="p">:</span> <span class="n">l</span><span class="o">.</span><span class="n">titulo</span><span class="p">})</span></div>
+
+
+<div class="viewcode-block" id="BibliotecaModel.libro_eliminar">
+<a class="viewcode-back" href="../../../proyectoPY.model.html#proyectoPY.model.model.BibliotecaModel.libro_eliminar">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">libro_eliminar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">id_libro</span><span class="p">):</span>
+        <span class="n">l</span> <span class="o">=</span> <span class="n">Libro</span><span class="o">.</span><span class="n">get_or_none</span><span class="p">(</span><span class="n">Libro</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">id_libro</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">l</span><span class="p">:</span>
+            <span class="n">titulo</span> <span class="o">=</span> <span class="n">l</span><span class="o">.</span><span class="n">titulo</span>
+            <span class="n">l</span><span class="o">.</span><span class="n">delete_instance</span><span class="p">()</span>
+            <span class="n">event_bus</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="n">EVT_LIBRO_ELIMINADO</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">id_libro</span><span class="p">,</span> <span class="s2">&quot;titulo&quot;</span><span class="p">:</span> <span class="n">titulo</span><span class="p">})</span></div>
+
+
+    <span class="c1"># ================= SOCIOS =================</span>
+<div class="viewcode-block" id="BibliotecaModel.socios_todos">
+<a class="viewcode-back" href="../../../proyectoPY.model.html#proyectoPY.model.model.BibliotecaModel.socios_todos">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">socios_todos</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">socios</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">Socio</span><span class="o">.</span><span class="n">select</span><span class="p">():</span>
+            <span class="n">socios</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+                <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                <span class="s2">&quot;nombre&quot;</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">nombre</span><span class="p">,</span>
+                <span class="s2">&quot;dni&quot;</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">dni</span><span class="p">,</span>
+                <span class="s2">&quot;telefono&quot;</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">telefono</span><span class="p">,</span>
+                <span class="s2">&quot;email&quot;</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">email</span>
+            <span class="p">})</span>
+        <span class="k">return</span> <span class="n">socios</span></div>
+
+
+<div class="viewcode-block" id="BibliotecaModel.socio_crear">
+<a class="viewcode-back" href="../../../proyectoPY.model.html#proyectoPY.model.model.BibliotecaModel.socio_crear">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">socio_crear</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">datos</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">Socio</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="o">**</span><span class="n">datos</span><span class="p">)</span>
+        <span class="n">event_bus</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="n">EVT_SOCIO_CREADO</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="s2">&quot;nombre&quot;</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">nombre</span><span class="p">})</span>
+        <span class="k">return</span> <span class="n">s</span></div>
+
+
+<div class="viewcode-block" id="BibliotecaModel.socio_modificar">
+<a class="viewcode-back" href="../../../proyectoPY.model.html#proyectoPY.model.model.BibliotecaModel.socio_modificar">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">socio_modificar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">id_socio</span><span class="p">,</span> <span class="o">**</span><span class="n">datos</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">Socio</span><span class="o">.</span><span class="n">get_or_none</span><span class="p">(</span><span class="n">Socio</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">id_socio</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">s</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">campo</span><span class="p">,</span> <span class="n">valor</span> <span class="ow">in</span> <span class="n">datos</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">campo</span><span class="p">,</span> <span class="n">valor</span><span class="p">)</span>
+            <span class="n">s</span><span class="o">.</span><span class="n">save</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="BibliotecaModel.socio_eliminar">
+<a class="viewcode-back" href="../../../proyectoPY.model.html#proyectoPY.model.model.BibliotecaModel.socio_eliminar">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">socio_eliminar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">id_socio</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">Socio</span><span class="o">.</span><span class="n">get_or_none</span><span class="p">(</span><span class="n">Socio</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">id_socio</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">s</span><span class="p">:</span>
+            <span class="n">s</span><span class="o">.</span><span class="n">delete_instance</span><span class="p">()</span></div>
+
+
+    <span class="c1"># ================= PRÉSTAMOS =================</span>
+<div class="viewcode-block" id="BibliotecaModel.prestar">
+<a class="viewcode-back" href="../../../proyectoPY.model.html#proyectoPY.model.model.BibliotecaModel.prestar">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">prestar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">id_libro</span><span class="p">,</span> <span class="n">id_socio</span><span class="p">):</span>
+        <span class="n">l</span> <span class="o">=</span> <span class="n">Libro</span><span class="o">.</span><span class="n">get_or_none</span><span class="p">(</span><span class="n">Libro</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">id_libro</span><span class="p">)</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">Socio</span><span class="o">.</span><span class="n">get_or_none</span><span class="p">(</span><span class="n">Socio</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">id_socio</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">l</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">s</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Libro o socio inexistente.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">l</span><span class="o">.</span><span class="n">cantidad</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No hay ejemplares disponibles.&quot;</span><span class="p">)</span>
+
+        <span class="n">l</span><span class="o">.</span><span class="n">cantidad</span> <span class="o">-=</span> <span class="mi">1</span>
+        <span class="n">l</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+        <span class="n">p</span> <span class="o">=</span> <span class="n">Prestamo</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">libro</span><span class="o">=</span><span class="n">l</span><span class="p">,</span> <span class="n">socio</span><span class="o">=</span><span class="n">s</span><span class="p">)</span>
+        <span class="n">event_bus</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="n">EVT_PRESTAMO_REALIZADO</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;libro&quot;</span><span class="p">:</span> <span class="n">l</span><span class="o">.</span><span class="n">titulo</span><span class="p">,</span> <span class="s2">&quot;socio&quot;</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">nombre</span><span class="p">,</span> <span class="s2">&quot;prestamo_id&quot;</span><span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">id</span><span class="p">})</span>
+        <span class="k">return</span> <span class="n">p</span><span class="o">.</span><span class="n">id</span></div>
+
+
+<div class="viewcode-block" id="BibliotecaModel.devolver">
+<a class="viewcode-back" href="../../../proyectoPY.model.html#proyectoPY.model.model.BibliotecaModel.devolver">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">devolver</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">id_prestamo</span><span class="p">):</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">Prestamo</span><span class="o">.</span><span class="n">get_or_none</span><span class="p">(</span><span class="n">Prestamo</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">id_prestamo</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">p</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Préstamo inexistente.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">fecha_devolucion</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Este préstamo ya fue devuelto.&quot;</span><span class="p">)</span>
+
+        <span class="n">p</span><span class="o">.</span><span class="n">fecha_devolucion</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+        <span class="n">l</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">libro</span>
+        <span class="n">l</span><span class="o">.</span><span class="n">cantidad</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">l</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+        <span class="n">event_bus</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="n">EVT_DEVOLUCION_REGISTRADA</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;libro&quot;</span><span class="p">:</span> <span class="n">l</span><span class="o">.</span><span class="n">titulo</span><span class="p">,</span> <span class="s2">&quot;prestamo_id&quot;</span><span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">id</span><span class="p">})</span></div>
+</div>
+
+
+
+
+
+
+
+
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Derechos de autor .</p>
+  </div>
+
+  Compilado con <a href="https://www.sphinx-doc.org/">Sphinx</a> usando un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">tema</a>
+    proporcionado por <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
