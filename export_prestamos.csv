@@ -1,0 +1,4 @@
+ID,Libro,Categoría,Subcategoría,Socio,DNI,Fecha préstamo,Fecha vencimiento,Fecha devolución,Estado
+3,La razón de mi vida,Historia,Política argentina,ignacio alcañiz,43524171,17/04/2026 20:14,,17/04/2026 20:22,Devuelto
+2,La razón de mi vida,Historia,Política argentina,ignacio alcañiz,43524171,17/04/2026 19:36,,17/04/2026 19:42,Devuelto
+1,La razón de mi vida,Historia,Política argentina,ignacio alcañiz,43524171,17/04/2026 19:34,24/04/2026 19:36,17/04/2026 19:36,Devuelto
